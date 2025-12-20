@@ -150,8 +150,11 @@ namespace MessManagement.Routes
                     var createdSchedule = await dbContext.WeekSchedules
                         .FirstOrDefaultAsync(s => s.Id == schedule.Id);
 
-                    // Load meals for the created schedule
-                    await LoadMealsForSchedule(createdSchedule, dbContext);
+                    if (createdSchedule != null)
+                    {
+                        // Load meals for the created schedule
+                        await LoadMealsForSchedule(createdSchedule, dbContext);
+                    }
 
                     Console.WriteLine($"Schedule created successfully (ID: {schedule.Id})");
 
@@ -216,8 +219,11 @@ namespace MessManagement.Routes
                     var updatedSchedule = await dbContext.WeekSchedules
                         .FirstOrDefaultAsync(s => s.Id == id);
 
-                    // Load meals for the updated schedule
-                    await LoadMealsForSchedule(updatedSchedule, dbContext);
+                    if (updatedSchedule != null)
+                    {
+                        // Load meals for the updated schedule
+                        await LoadMealsForSchedule(updatedSchedule, dbContext);
+                    }
 
                     Console.WriteLine($"Schedule updated successfully (ID: {id})");
 
