@@ -13,14 +13,6 @@ export default function EditDayModal({ isOpen, onClose, day, schedule, meals, on
   const [selectedMorningMeal, setSelectedMorningMeal] = useState(initialMorningMeal);
   const [selectedEveningMeal, setSelectedEveningMeal] = useState(initialEveningMeal);
 
-  // Reset meals when modal opens with new day
-  useEffect(() => {
-    if (isOpen) {
-      setSelectedMorningMeal(schedule?.morningMeal || null);
-      setSelectedEveningMeal(schedule?.eveningMeal || null);
-    }
-  }, [isOpen, day, schedule?.morningMeal, schedule?.eveningMeal]);
-
   const handleSave = () => {
     const morningMealId = selectedMorningMeal?.id || null;
     const eveningMealId = selectedEveningMeal?.id || null;
@@ -193,7 +185,7 @@ export default function EditDayModal({ isOpen, onClose, day, schedule, meals, on
 
 function MealCard({ meal, onRemove, onReplace, disabled }) {
   return (
-    <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm hover:shadow-md transition-all">
+    <div className="p-5 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 border-2 border-blue-200 dark:border-blue-700 rounded-xl shadow-sm hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
         {meal.image?.url && (
           <div className="relative h-20 w-20 rounded-xl overflow-hidden shrink-0 border-2 border-white dark:border-slate-700 shadow-md">
@@ -269,8 +261,8 @@ function MealSelector({ meals, onSelect, disabled, label = "Select Meal" }) {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-20 max-h-[28rem] overflow-hidden">
-            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
+          <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-20 max-h-112 overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                 Choose a Meal
               </p>
