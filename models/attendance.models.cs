@@ -1,29 +1,117 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MessManagement.Models
 {
-    public class Attendance
+    public class MonthlyAttendance
     {
         public int Id { get; set; }
         public int UserId { get; set; }
-        public int MealId { get; set; }
-        public DateTime Date { get; set; } = DateTime.UtcNow.Date;
-        public MealTime MealTime { get; set; } = MealTime.Morning;
-        public bool WasTaken { get; set; } = false;
-        private decimal chargedAmount = 0;
-        public decimal ChargedAmount
+        
+        private int month;
+        public int Month
         {
-            get => chargedAmount;
+            get => month;
+            set
+            {
+                if (value < 1 || value > 12)
+                    throw new ArgumentException("Month must be between 1 and 12.");
+                month = value;
+            }
+        }
+        
+        private int year;
+        public int Year
+        {
+            get => year;
+            set
+            {
+                if (value < 2000 || value > 2100)
+                    throw new ArgumentException("Year must be between 2000 and 2100.");
+                year = value;
+            }
+        }
+        
+        public List<DailyAttendance> DailyAttendances { get; set; } = new List<DailyAttendance>();
+        
+        public decimal TotalMonthlyBill { get; set; } = 0;
+        public int TotalMealsTaken { get; set; } = 0;
+        
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+        
+        public void UpdateTimestamp() => UpdatedAt = DateTime.UtcNow;
+        
+        public void CalculateMonthlyTotals()
+        {
+            TotalMonthlyBill = DailyAttendances.Sum(d => d.MorningChargedAmount + d.EveningChargedAmount);
+            TotalMealsTaken = DailyAttendances.Count(d => d.MorningMealTaken) + 
+                            DailyAttendances.Count(d => d.EveningMealTaken);
+        }
+        
+        public void InitializeMonth()
+        {
+            var daysInMonth = DateTime.DaysInMonth(Year, Month);
+            DailyAttendances.Clear();
+            
+            for (int day = 1; day <= daysInMonth; day++)
+            {
+                DailyAttendances.Add(new DailyAttendance
+                {
+                    Day = day,
+                    Date = new DateTime(Year, Month, day)
+                });
+            }
+        }
+    }
+    
+    public class DailyAttendance
+    {
+        private int day;
+        public int Day
+        {
+            get => day;
+            set
+            {
+                if (value < 1 || value > 31)
+                    throw new ArgumentException("Day must be between 1 and 31.");
+                day = value;
+            }
+        }
+        
+        public DateTime Date { get; set; }
+        
+        public bool MorningMealTaken { get; set; } = false;
+        public int? MorningMealId { get; set; }
+        private decimal morningChargedAmount = 0;
+        public decimal MorningChargedAmount
+        {
+            get => morningChargedAmount;
             set
             {
                 if (value < 0) throw new ArgumentException("Charged amount cannot be negative.");
-                chargedAmount = value;
+                morningChargedAmount = value;
             }
         }
-
+        
+        public bool EveningMealTaken { get; set; } = false;
+        public int? EveningMealId { get; set; }
+        private decimal eveningChargedAmount = 0;
+        public decimal EveningChargedAmount
+        {
+            get => eveningChargedAmount;
+            set
+            {
+                if (value < 0) throw new ArgumentException("Charged amount cannot be negative.");
+                eveningChargedAmount = value;
+            }
+        }
+        
         public string Notes { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
-        public void UpdateTimestamp() => UpdatedAt = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        
+        public decimal GetDailyTotal() => MorningChargedAmount + EveningChargedAmount;
+        public int GetMealsCount() => (MorningMealTaken ? 1 : 0) + (EveningMealTaken ? 1 : 0);
     }
 }

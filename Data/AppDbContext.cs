@@ -21,7 +21,7 @@ namespace MessManagement.Data
         public DbSet<Bill> Bills { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<UserBalance> UserBalances { get; set; }
-        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<MonthlyAttendance> MonthlyAttendances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -115,13 +115,22 @@ namespace MessManagement.Data
                 entity.HasIndex(e => e.UserId).IsUnique();
             });
 
-            modelBuilder.Entity<Attendance>(entity =>
+            modelBuilder.Entity<MonthlyAttendance>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => new { e.UserId, e.Date, e.MealTime }).IsUnique();
-                entity.Property(e => e.Date).HasColumnType("date");
-                entity.Property(e => e.ChargedAmount).HasColumnType("decimal(18,2)");
-                entity.Property(e => e.Notes).HasMaxLength(500);
+                entity.HasIndex(e => new { e.UserId, e.Month, e.Year }).IsUnique();
+                entity.Property(e => e.TotalMonthlyBill).HasColumnType("decimal(18,2)");
+                
+                // Configure DailyAttendances as owned collection
+                entity.OwnsMany(e => e.DailyAttendances, da =>
+                {
+                    da.Property(d => d.Day).IsRequired();
+                    da.Property(d => d.Date).HasColumnType("date").IsRequired();
+                    da.Property(d => d.MorningChargedAmount).HasColumnType("decimal(18,2)");
+                    da.Property(d => d.EveningChargedAmount).HasColumnType("decimal(18,2)");
+                    da.Property(d => d.Notes).HasMaxLength(500);
+                    da.HasIndex(d => d.Date);
+                });
             });
         }
     }

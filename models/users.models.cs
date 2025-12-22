@@ -127,6 +127,12 @@ namespace MessManagement.Models
         public int? MessId { get; set; }
 
         public ProfilePicture ProfilePicture { get; set; } = new ProfilePicture();
+        
+        // Current month attendance reference (for quick access)
+        public int? CurrentMonthAttendanceId { get; set; }
+        
+        // Track when user's attendance tracking started
+        public DateTime AttendanceStartDate { get; set; } = DateTime.UtcNow;
 
         public void UpdateTimestamp()
         {
