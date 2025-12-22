@@ -12,9 +12,7 @@ import {
 } from "./ui/sidebar";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { LogOutIcon, ChefHat } from "lucide-react";
+import { LogOutIcon, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import {
@@ -26,21 +24,18 @@ import {
   CogIcon,
 } from "@heroicons/react/24/outline";
 
-const brandName = "Mess Management System";
-
 const dummyLinks = [
   { title: "Dashboard", icon: HomeIcon, href: "/admin/dashboard" },
-  { title: "Users", icon: UsersIcon, href: "#" },
+  { title: "Users", icon: UsersIcon, href: "/admin/users" },
   { title: "Meals & Schedules", icon: ClipboardDocumentListIcon, href: "/admin/meals" },
   { title: "Schedule", icon: CalendarDaysIcon, href: "#" },
   { title: "Reports", icon: ChartBarIcon, href: "#" },
   { title: "Settings", icon: CogIcon, href: "#" },
 ];
 
-export function AppSidebar({ children }) {
+export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const router = useRouter();
 
   const handleLogout = () => {
     toast("Logged out successfully");
@@ -49,22 +44,35 @@ export function AppSidebar({ children }) {
   return (
     <Sidebar
       collapsible="icon"
-      className="manrope bg-slate-200/60 dark:bg-slate-950 backdrop-blur-md border-b border-slate-300 dark:border-slate-700/60 flex flex-col"
+      className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col"
     >
-      <SidebarHeader className="p-4 bg-slate-200/60 dark:bg-slate-950 backdrop-blur-md border-b border-slate-300 dark:border-slate-700/60">
-        <div className="flex items-center gap-2">
-          <ChefHat className="h-5 w-5 text-slate-800 dark:text-slate-200" />
-          {!isCollapsed && <span className="text-xl font-bold text-slate-800 dark:text-slate-200">{brandName}</span>}
+      <SidebarHeader className="h-16 px-4 flex items-center border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-sidebar-primary/10 flex items-center justify-center">
+            <ShieldCheck className="h-5 w-5 text-sidebar-primary" />
+          </div>
+          {!isCollapsed && (
+            <span className="text-base font-semibold">
+              Admin Panel
+            </span>
+          )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="flex-1 p-1 pl-2 bg-slate-200/60 dark:bg-slate-950 backdrop-blur-md">
+      <SidebarContent className="flex-1 px-2 py-3">
         <SidebarMenu>
           {dummyLinks.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild className="flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md px-2 py-2">
+              <SidebarMenuButton
+                asChild
+                className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
+                transition-colors
+                hover:bg-sidebar-accent/60
+                data-[active=true]:bg-sidebar-primary/15
+                data-[active=true]:text-sidebar-primary"
+              >
                 <Link href={item.href}>
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                   {!isCollapsed && <span>{item.title}</span>}
                 </Link>
               </SidebarMenuButton>
@@ -73,11 +81,12 @@ export function AppSidebar({ children }) {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="bg-slate-200/60 dark:bg-slate-950 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-700/60 p-2">
+      <SidebarFooter className="px-3 py-3 border-t border-sidebar-border">
         <Button
           onClick={handleLogout}
-          variant="outline"
-          className="w-full flex items-center gap-2"
+          variant="ghost"
+          className="w-full flex items-center gap-3 justify-start rounded-lg text-sm
+          hover:bg-destructive/10 hover:text-destructive transition-colors"
         >
           <LogOutIcon className="h-4 w-4" />
           {!isCollapsed && <span>Logout</span>}
