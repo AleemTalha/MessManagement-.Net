@@ -80,62 +80,42 @@ namespace MessManagement.Routes
                         var dailyTotals = new List<decimal>();
                         var dailyMealCounts = new List<int>();
                         var mealDetails = new List<object>();
-                        var hasAnyAttendance = false;
 
                         for (int day = 1; day <= daysInMonth; day++)
                         {
-                            if (monthlyAttendance != null)
-                            {
-                                var dailyRecord = monthlyAttendance.DailyAttendances
-                                    .FirstOrDefault(da => da.Day == day);
+                            var dayDate = new DateTime(year, month, day);
+                            var isPastOrToday = dayDate <= DateTime.UtcNow.Date;
+                            var dailyRecord = monthlyAttendance?.DailyAttendances.FirstOrDefault(da => da.Day == day);
 
-                                if (dailyRecord != null)
+                            if (dailyRecord != null)
+                            {
+                                morningAttendance.Add(dailyRecord.MorningMealTaken ? "p" : (isPastOrToday ? "a" : null));
+                                eveningAttendance.Add(dailyRecord.EveningMealTaken ? "p" : (isPastOrToday ? "a" : null));
+                                dailyTotals.Add(dailyRecord.GetDailyTotal());
+                                dailyMealCounts.Add(dailyRecord.GetMealsCount());
+                                mealDetails.Add(new
                                 {
-                                    hasAnyAttendance = true;
-                                    // 'p' for present, null for absent/not taken
-                                    morningAttendance.Add(dailyRecord.MorningMealTaken ? "p" : null);
-                                    eveningAttendance.Add(dailyRecord.EveningMealTaken ? "p" : null);
-                                    dailyTotals.Add(dailyRecord.GetDailyTotal());
-                                    dailyMealCounts.Add(dailyRecord.GetMealsCount());
-                                    mealDetails.Add(new
+                                    day = day,
+                                    morning = dailyRecord.MorningMealTaken ? new
                                     {
-                                        day = day,
-                                        morning = dailyRecord.MorningMealTaken ? new
-                                        {
-                                            taken = true,
-                                            mealName = dailyRecord.MorningMealName,
-                                            mealPrice = dailyRecord.MorningMealPrice,
-                                            chargedAmount = dailyRecord.MorningChargedAmount
-                                        } : null,
-                                        evening = dailyRecord.EveningMealTaken ? new
-                                        {
-                                            taken = true,
-                                            mealName = dailyRecord.EveningMealName,
-                                            mealPrice = dailyRecord.EveningMealPrice,
-                                            chargedAmount = dailyRecord.EveningChargedAmount
-                                        } : null
-                                    });
-                                }
-                                else
-                                {
-                                    // null for not marked (no daily record exists)
-                                    morningAttendance.Add(null);
-                                    eveningAttendance.Add(null);
-                                    dailyTotals.Add(0);
-                                    dailyMealCounts.Add(0);
-                                    mealDetails.Add(new
+                                        taken = true,
+                                        mealName = dailyRecord.MorningMealName,
+                                        mealPrice = dailyRecord.MorningMealPrice,
+                                        chargedAmount = dailyRecord.MorningChargedAmount
+                                    } : null,
+                                    evening = dailyRecord.EveningMealTaken ? new
                                     {
-                                        day = day,
-                                        morning = (object?)null,
-                                        evening = (object?)null
-                                    });
-                                }
+                                        taken = true,
+                                        mealName = dailyRecord.EveningMealName,
+                                        mealPrice = dailyRecord.EveningMealPrice,
+                                        chargedAmount = dailyRecord.EveningChargedAmount
+                                    } : null
+                                });
                             }
                             else
                             {
-                                // null for not marked (no monthly record exists)
-                                morningAttendance.Add(null);
-                                eveningAttendance.Add(null);
+                                morningAttendance.Add(isPastOrToday ? "a" : null);
+                                eveningAttendance.Add(isPastOrToday ? "a" : null);
                                 dailyTotals.Add(0);
                                 dailyMealCounts.Add(0);
                                 mealDetails.Add(new
@@ -145,16 +125,6 @@ namespace MessManagement.Routes
                                     evening = (object?)null
                                 });
                             }
-                        }
-
-                        // If no attendance data exists, send empty arrays
-                        if (!hasAnyAttendance)
-                        {
-                            morningAttendance = new List<string?>();
-                            eveningAttendance = new List<string?>();
-                            dailyTotals = new List<decimal>();
-                            dailyMealCounts = new List<int>();
-                            mealDetails = new List<object>();
                         }
 
                         var totalMorningMeals = morningAttendance.Count(a => a == "p");
