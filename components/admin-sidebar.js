@@ -93,10 +93,10 @@ export function AppSidebar({ children }) {
 
           {!isCollapsed && (
             <span className="inline-block max-w-[calc(100%-48px)] overflow-hidden whitespace-nowrap text-ellipsis">
-              <span className="block font-extrabold text-[16px] leading-[18px] truncate">
+              <span className="block font-extrabold text-[16px] leading-4.5 truncate">
                 {brandName}
               </span>
-              <span className="block text-xs leading-[14px] truncate text-slate-600">
+              <span className="block text-xs leading-3.5 truncate text-slate-600">
                 Admin Panel
               </span>
             </span>

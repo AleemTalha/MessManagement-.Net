@@ -31,7 +31,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en" className={raleway.variable}>
-      <body className="antialiased">
+      <body className="antialiased font-raleway">
         <QueryClientProvider client={queryClient}>
           {children}
           <ToastContainer

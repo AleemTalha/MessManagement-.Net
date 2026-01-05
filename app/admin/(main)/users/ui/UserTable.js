@@ -23,10 +23,10 @@ export default function UserTable({
 
   if (error) {
     return (
-      <div className="bg-white dark:bg-slate-50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-300 p-8">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
         <div className="text-center">
           <div className="text-red-500 text-lg font-semibold mb-2">Error Loading Users</div>
-          <p className="text-slate-600 dark:text-slate-500 mb-4">{error.message}</p>
+          <p className="text-slate-600 mb-4">{error.message}</p>
           <Button
             onClick={onRetry}
             className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -40,7 +40,7 @@ export default function UserTable({
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-slate-50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-300 p-8">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-8">
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="animate-pulse flex space-x-4">
@@ -58,13 +58,13 @@ export default function UserTable({
 
   if (!users || users.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-300 p-12">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-12">
         <div className="text-center">
           <User className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-700 mb-2">
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">
             No Users Found
           </h3>
-          <p className="text-slate-600 dark:text-slate-500 mb-4">
+          <p className="text-slate-600 mb-4">
             Get started by adding your first user to the system.
           </p>
         </div>
@@ -74,36 +74,36 @@ export default function UserTable({
 
   return (
     <div className="space-y-4">
-      <div className="bg-white dark:bg-slate-50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-300 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-100 dark:bg-slate-200 border-b border-slate-200 dark:border-slate-300">
+            <thead className="bg-slate-100 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Contact
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Joined
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-300">
+            <tbody className="divide-y divide-slate-200">
               {users.map((user) => (
                 <tr
                   key={user.id}
-                  className="hover:bg-slate-50 dark:hover:bg-slate-100 transition-colors"
+                  className="hover:bg-slate-50 transition-colors"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -113,21 +113,21 @@ export default function UserTable({
                         </span>
                       </div>
                       <div className="min-w-0">
-                        <div className="font-semibold text-slate-800 dark:text-slate-700 truncate">
+                        <div className="font-semibold text-slate-800 truncate">
                           {user.name}
                         </div>
-                        <div className="text-sm text-slate-600 dark:text-slate-500 truncate">
+                        <div className="text-sm text-slate-600 truncate">
                           {user.email}
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-slate-700 dark:text-slate-600">
+                    <div className="text-sm text-slate-700">
                       {user.phoneNumber}
                     </div>
                     {user.age && (
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <div className="text-xs text-slate-500">
                         Age: {user.age}
                       </div>
                     )}
@@ -154,7 +154,7 @@ export default function UserTable({
                       {user.isActive ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-500">
+                  <td className="px-6 py-4 text-sm text-slate-600">
                     {new Date(user.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -188,9 +188,9 @@ export default function UserTable({
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-50 rounded-lg shadow-sm border border-slate-200 dark:border-slate-300 px-6 py-4">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="text-sm text-slate-600 dark:text-slate-500">
+          <div className="text-sm text-slate-600">
             Showing <span className="font-semibold text-slate-800">{skip + 1}</span> to{" "}
             <span className="font-semibold text-slate-800">
               {Math.min(skip + limit, total)}
@@ -210,7 +210,7 @@ export default function UserTable({
               Previous
             </Button>
 
-            <div className="text-sm text-slate-600 dark:text-slate-500 px-3">
+            <div className="text-sm text-slate-600 px-3">
               Page <span className="font-semibold">{currentPage}</span> of{" "}
               <span className="font-semibold">{totalPages}</span>
             </div>

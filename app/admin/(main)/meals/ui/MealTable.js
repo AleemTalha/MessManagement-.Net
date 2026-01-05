@@ -14,14 +14,14 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 function EmptyState({ onButtonClick }) {
   return (
-    <div className="bg-white dark:bg-slate-50 px-6 pt-20 flex flex-col items-center justify-center">
+    <div className="bg-white px-6 pt-20 flex flex-col items-center justify-center">
       <div className="mb-4 h-30 w-30 bg-blue-100 rounded-full flex items-center justify-center">
-        <Utensils className="h-16 w-16  text-slate-400 dark:text-slate-400" />
+        <Utensils className="h-16 w-16 text-slate-400" />
       </div>
-      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+      <h3 className="text-xl font-semibold text-slate-900 mb-2">
         No meals yet
       </h3>
-      <p className="text-slate-600 dark:text-slate-400 text-center mb-6 max-w-md">
+      <p className="text-slate-600 text-center mb-6 max-w-md">
         Get started by adding your first meal to the menu. Create delicious
         options for your customers.
       </p>
@@ -40,14 +40,14 @@ function EmptyState({ onButtonClick }) {
 
 function ErrorState({ onButtonClick, errorMessage }) {
   return (
-    <div className="bg-white dark:bg-slate-50 shadow-sm border border-slate-200 dark:border-slate-300 rounded-sm px-6 py-12 flex flex-col items-center justify-center">
+    <div className="bg-white shadow-sm border border-slate-200 rounded-sm px-6 py-12 flex flex-col items-center justify-center">
       <div className="mb-4">
-        <ExclamationTriangleIcon className="h-16 w-16 text-red-400 dark:text-red-500" />
+        <ExclamationTriangleIcon className="h-16 w-16 text-red-400" />
       </div>
-      <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+      <h3 className="text-xl font-semibold text-slate-900 mb-2">
         Something went wrong
       </h3>
-      <p className="text-slate-600 dark:text-slate-400 text-center mb-6 max-w-md">
+      <p className="text-slate-600 text-center mb-6 max-w-md">
         {errorMessage}
       </p>
       {onButtonClick && (
@@ -66,31 +66,31 @@ function ErrorState({ onButtonClick, errorMessage }) {
 function TableSkeleton() {
   return (
     <SkeletonTheme baseColor="#f1f5f9" highlightColor="#e2e8f0">
-      <div className="bg-white dark:bg-slate-50 shadow-sm border border-slate-200 dark:border-slate-300 rounded-sm overflow-x-auto">
+      <div className="bg-white shadow-sm border border-slate-200 rounded-sm overflow-x-auto">
         <table className="w-full min-w-200 table-fixed">
-          <thead className="bg-slate-100 dark:bg-slate-200 border-b border-slate-200 dark:border-slate-300">
+          <thead className="bg-slate-100 border-b border-slate-200">
             <tr>
-              <th className="w-6 px-2 py-3 text-center border text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-6 px-2 py-3 text-center border text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 #
               </th>
-              <th className="w-65 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-65 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Meal
               </th>
-              <th className="w-32 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-32 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Weight
               </th>
-              <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Price
               </th>
-              <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Status
               </th>
-              <th className="w-24 px-4 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+              <th className="w-24 px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-300">
+          <tbody className="divide-y divide-slate-200">
             {Array.from({ length: 5 }).map((_, index) => (
               <tr key={index}>
                 <td className="border w-6 px-2 py-4 text-center">
@@ -160,43 +160,43 @@ export default function MealTable({
   }
 
   return (
-    <div className="bg-white shadow-sm border border-slate-200 dark:border-slate-300 rounded-sm overflow-x-auto">
+    <div className="bg-white shadow-sm border border-slate-200 rounded-sm overflow-x-auto">
       <table className="w-full min-w-200 table-fixed">
-        <thead className="bg-slate-100 dark:bg-slate-200 border-b border-slate-200 dark:border-slate-300">
+        <thead className="bg-slate-100 border-b border-slate-200">
           <tr>
-            <th className="w-6 px-2 py-3 text-center border text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-6 px-2 py-3 text-center border text-xs font-semibold text-slate-700 uppercase tracking-wider">
               #
             </th>
-            <th className="w-65 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-65 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Meal
             </th>
-            <th className="w-32 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-32 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Weight
             </th>
-            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Price
             </th>
-            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Status
             </th>
-            <th className="w-24 px-4 py-3 text-right text-xs font-semibold text-slate-700 dark:text-slate-600 uppercase tracking-wider">
+            <th className="w-24 px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-300">
+        <tbody className="divide-y divide-slate-200">
           {meals.map((meal, index) => (
             <tr
               key={meal.id}
-              className="hover:bg-slate-50 dark:hover:bg-slate-100"
+              className="hover:bg-slate-50"
             >
-              <td className="border w-6 px-2 text-center py-4  text-sm text-slate-700 dark:text-slate-600">
+              <td className="border w-6 px-2 text-center py-4 text-sm text-slate-700">
                 {index + 1}
               </td>
-              <td className="px-4 py-4 text-sm text-slate-900 dark:text-slate-800">
+              <td className="px-4 py-4 text-sm text-slate-900">
                 <div className="flex items-start gap-3">
                   {meal.image?.url && (
-                    <div className="relative h-12 w-12 rounded-sm overflow-hidden bg-slate-100 dark:bg-slate-200 shrink-0">
+                    <div className="relative h-12 w-12 rounded-sm overflow-hidden bg-slate-100 shrink-0">
                       <Image
                         src={meal.image.url}
                         alt={meal.name}
@@ -208,24 +208,24 @@ export default function MealTable({
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold truncate">{meal.name}</div>
-                    <div className="text-xs pt-1 text-slate-600 dark:text-slate-500 truncate">
+                    <div className="text-xs pt-1 text-slate-600 truncate">
                       {meal.description || "No description available"}
                     </div>
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-4 text-sm  text-slate-700 dark:text-slate-600">
+              <td className="px-4 py-4 text-sm text-slate-700">
                 {meal.weight}g
               </td>
-              <td className="px-4 py-4 text-sm font-medium text-slate-900 dark:text-slate-800 ">
+              <td className="px-4 py-4 text-sm font-medium text-slate-900">
                 {meal.price}
               </td>
               <td className="px-4 py-4 text-sm ">
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-sm ${
                     meal.isAvailable
-                      ? "bg-green-100 text-green-700 dark:bg-green-200 dark:text-green-800"
-                      : "bg-red-100 text-red-700 dark:bg-red-200 dark:text-red-800"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
                   }`}
                 >
                   {meal.isAvailable ? "Available" : "Unavailable"}

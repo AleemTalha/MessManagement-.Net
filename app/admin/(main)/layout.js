@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/admin-sidebar";
 import { AdminHeader } from "./ui/header";
+import { DigitalClockClient } from "@/components/digital-clock-client";
 import AdminSidebarProvider from "./ui/sidebarProvider.js";
 import { cookies } from "next/headers";
 import ScrollToTopClient from "./ui/ScrollToTopClient.js";
@@ -24,6 +25,7 @@ export default async function AdminLayout({ children }) {
             <div className=" px-2 md:px-4 lg:px-6">{children}</div>
           </ScrollToTopClient>
         </main>
+        <DigitalClockClient />
       </AdminSidebarProvider>
     </div>
   );

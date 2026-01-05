@@ -89,7 +89,7 @@ export default function AdminLogin() {
               />
             </div>
 
-            <h1 className="text-4xl font-bold base-color">Login Now</h1>
+            <h1 className="text-4xl font-bold text-[#f86e58]">Login Now</h1>
             <p className="text-slate-600 text-md pt-3">
               Sign in to your management account.
             </p>
@@ -109,7 +109,7 @@ export default function AdminLogin() {
             <label
               htmlFor="email"
               className="absolute left-4 top-1/3 -translate-y-1/2 bg-white px-2 text-sm text-slate-500 transition-all duration-200 pointer-events-none
-    peer-focus:top-0 peer-focus:text-xs peer-focus:base-color
+    peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#f86e58
     peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
             >
               Email address
@@ -130,7 +130,7 @@ export default function AdminLogin() {
             <label
               htmlFor="password"
               className="absolute left-4 top-1/3 -translate-y-1/2 bg-white px-2 text-sm text-slate-500 transition-all duration-200 pointer-events-none
-    peer-focus:top-0 peer-focus:text-xs peer-focus:base-color
+    peer-focus:top-0 peer-focus:text-xs peer-focus:text-[#f86e58
     peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
             >
               Password
@@ -161,7 +161,7 @@ export default function AdminLogin() {
             <button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="w-full base-bg text-white py-3.5 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-[#f86e58] text-white py-3.5 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -191,7 +191,7 @@ export default function AdminLogin() {
           <div className="space-y-6">
             <h2 className="text-6xl font-bold text-white leading-tight">
               Manage Your Mess
-              <span className="block base-color mt-2">Effortlessly</span>
+              <span className="block text-[#f86e58 mt-2">Effortlessly</span>
             </h2>
             <p className="text-slate-300 text-lg leading-relaxed">
               Simplify mess operations with comprehensive tools for meal planning, 
@@ -199,15 +199,15 @@ export default function AdminLogin() {
             </p>
             <div className="pt-4 space-y-3 text-slate-300">
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full base-bg"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#f86e58]"></div>
                 <span className="text-base">Real-time attendance monitoring</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full base-bg"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#f86e58]"></div>
                 <span className="text-base">Automated billing system</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full base-bg"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#f86e58]"></div>
                 <span className="text-base">Weekly menu scheduling</span>
               </div>
             </div>

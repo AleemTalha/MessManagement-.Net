@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5205";
+
 
 export const useAttendance = (month, year, page = 1, limit = 30) => {
   return useQuery({
@@ -24,6 +25,40 @@ export const useAttendance = (month, year, page = 1, limit = 30) => {
 
       return response.json();
     },
-    enabled: !!month && !!year, // Only run query when month and year are provided
+    enabled: !!month && !!year,
+    staleTime: Infinity,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+};
+
+export const useSaveAttendance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ month, year, day, attendance }) => {
+      const response = await fetch(`${API_BASE_URL}/api/admin/attendance/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ month, year, day, attendance }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save attendance");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ 
+        queryKey: ["attendance", variables.month, variables.year] 
+      });
+    },
   });
 };

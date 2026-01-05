@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5205";
 
-// Fetch all meals
 const fetchMeals = async () => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals`, {
     headers: {
@@ -20,7 +19,6 @@ const fetchMeals = async () => {
   return response.json();
 };
 
-// Fetch single meal by ID
 const fetchMealById = async (id) => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
     headers: {
@@ -36,7 +34,6 @@ const fetchMealById = async (id) => {
   return response.json();
 };
 
-// Create new meal
 const createMeal = async (mealData) => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals`, {
     method: "POST",
@@ -55,7 +52,6 @@ const createMeal = async (mealData) => {
   return response.json();
 };
 
-// Update meal
 const updateMeal = async ({ id, data }) => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
     method: "PUT",
@@ -74,7 +70,6 @@ const updateMeal = async ({ id, data }) => {
   return response.json();
 };
 
-// Delete meal
 const deleteMeal = async (id) => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
     method: "DELETE",
@@ -92,9 +87,6 @@ const deleteMeal = async (id) => {
   return response.json();
 };
 
-// Custom hooks
-
-// Hook to fetch all meals
 export const useMeals = () => {
   return useQuery({
     queryKey: ["meals"],
@@ -104,7 +96,6 @@ export const useMeals = () => {
   });
 };
 
-// Hook to fetch single meal
 export const useMeal = (id) => {
   return useQuery({
     queryKey: ["meals", id],
@@ -114,7 +105,6 @@ export const useMeal = (id) => {
   });
 };
 
-// Hook to create meal
 export const useCreateMeal = () => {
   const queryClient = useQueryClient();
 
@@ -146,7 +136,6 @@ export const useCreateMeal = () => {
   });
 };
 
-// Hook to update meal
 export const useUpdateMeal = () => {
   const queryClient = useQueryClient();
 
@@ -193,7 +182,6 @@ export const useUpdateMeal = () => {
   });
 };
 
-// Hook to delete meal
 export const useDeleteMeal = () => {
   const queryClient = useQueryClient();
 

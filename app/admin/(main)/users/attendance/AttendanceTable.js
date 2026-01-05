@@ -1,255 +1,222 @@
 "use client"
-import { useState } from 'react'
-import { useAttendance } from '@/utils/useAttendance'
-import { ChevronLeft, ChevronRight, Maximize2, Minimize2, CalendarDays } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
+import { useAttendance, useSaveAttendance } from '@/utils/useAttendance'
+import { useSchedule } from '@/utils/useSchedule'
+import { Clock } from 'lucide-react'
+import { toast } from 'react-toastify'
+import TimeDebugger from './ui/TimeDebugger'
+import AttendanceHeader from './ui/AttendanceHeader'
+import AttendanceTableBody from './ui/AttendanceTableBody'
+import AttendanceLegend from './ui/AttendanceLegend'
 
 const AttendanceTable = ({ month, year, page, limit, onPageChange }) => {
-  const { data, isLoading, isError, error } = useAttendance(month, year, page, limit)
+  const { data, isLoading: isAttendanceLoading, isError: isAttendanceError, error: attendanceError, refetch } = useAttendance(month, year, page, limit)
+  const { data: scheduleData, isLoading: isScheduleLoading, isError: isScheduleError, error: scheduleError } = useSchedule()
+  const saveAttendance = useSaveAttendance()
+  
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [editableAttendance, setEditableAttendance] = useState({})
+  const [serverAttendance, setServerAttendance] = useState({})
+  const [balanceChanges, setBalanceChanges] = useState({})
+  const [hasChanges, setHasChanges] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [debugTime, setDebugTime] = useState(null)
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-white border border-slate-200">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-700 rounded-full animate-spin" />
-          <p className="text-sm text-slate-600 font-medium">Loading attendance...</p>
-        </div>
-      </div>
-    )
-  }
+  const isLoading = isAttendanceLoading || isScheduleLoading
+  const isError = isAttendanceError || isScheduleError
+  const error = attendanceError || scheduleError
 
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-white border border-red-200">
-        <div className="text-center">
-          <p className="text-red-700 font-semibold text-lg">Error Loading Data</p>
-          <p className="text-sm text-red-600 mt-2">{error?.message}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!data?.attendanceData?.length) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-white border border-slate-200">
-        <p className="text-slate-500 text-lg">No attendance data available</p>
-      </div>
-    )
-  }
-
-  const currentDate = new Date().getDate()
-  const currentMonth = new Date().getMonth() + 1
-  const currentYear = new Date().getFullYear()
-  const daysInMonth = data.daysInMonth
+  const now = debugTime || new Date()
+  const currentDate = now.getDate()
+  const currentMonth = now.getMonth() + 1
+  const currentYear = now.getFullYear()
+  const currentHour = now.getHours()
   const isCurrentMonth = month === currentMonth && year === currentYear
+  
+  const isBeforeMorningTime = currentHour < 6
+  const isMorningTime = currentHour >= 6 && currentHour < 15
+  const isEveningTime = currentHour >= 15
+  
+  const isReadOnly = data?.isReadOnly || !isCurrentMonth
+  const daysInMonth = data?.daysInMonth || 0
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
+  const getCurrentPeriod = () => {
+    if (isBeforeMorningTime) return 'none'
+    if (isMorningTime) return 'morning'
+    if (isEveningTime) return 'evening'
+    return 'none'
   }
 
-  const getAttendanceStatus = (status, isToday) => {
-    if (status === 'p') {
-      return { 
-        bg: isToday ? 'bg-green-700' : 'bg-green-600', 
-        text: 'P',
-        textColor: 'text-white'
-      }
-    }
-    if (status === 'a') {
-      return { 
-        bg: isToday ? 'bg-orange-600' : 'bg-orange-500', 
-        text: 'A',
-        textColor: 'text-white'
-      }
-    }
-    return { 
-      bg: 'bg-slate-50', 
-      text: '—',
-      textColor: 'text-slate-300'
+  const currentEditablePeriod = getCurrentPeriod()
+
+  const getMealPriceFromSchedule = (mealType) => {
+    if (!scheduleData) return 0
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const dayOfWeek = days[now.getDay()]
+    const daySchedule = scheduleData[dayOfWeek]
+    if (!daySchedule) return 0
+    return mealType === 'morning' ? (daySchedule.morningMeal?.price || 0) : (daySchedule.eveningMeal?.price || 0)
+  }
+
+  const handleSaveAttendance = async () => {
+    if (!hasChanges || isReadOnly || currentEditablePeriod === 'none') return
+
+    setIsSaving(true)
+    try {
+      const attendance = Object.entries(editableAttendance).map(([index, values]) => {
+        const update = { userId: data.attendanceData[parseInt(index)].userId, morningStatus: null, eveningStatus: null }
+        if (currentEditablePeriod === 'morning') update.morningStatus = values.morning
+        else if (currentEditablePeriod === 'evening') update.eveningStatus = values.evening
+        return update
+      })
+
+      await saveAttendance.mutateAsync({ month, year, day: currentDate, attendance })
+      
+      // Refetch data to get updated bills from backend
+      await refetch()
+      
+      // Reset local state
+      setBalanceChanges({})
+      setHasChanges(false)
+      setEditableAttendance({})
+      setServerAttendance({})
+      
+      toast.success('Attendance and bills saved successfully!', { position: "top-right", autoClose: 2000 })
+    } catch (error) {
+      toast.error(error?.message || 'Failed to save attendance', { position: "top-right", autoClose: 3000 })
+    } finally {
+      setIsSaving(false)
     }
   }
+
+  useEffect(() => {
+    if (data?.attendanceData && isCurrentMonth && !isReadOnly) {
+      const initialAttendance = {}
+      data.attendanceData.forEach((user, userIndex) => {
+        initialAttendance[userIndex] = {
+          morning: user.morningAttendance[currentDate - 1],
+          evening: user.eveningAttendance[currentDate - 1]
+        }
+      })
+      setEditableAttendance(initialAttendance)
+      setServerAttendance(JSON.parse(JSON.stringify(initialAttendance)))
+      setBalanceChanges({})
+      setHasChanges(false)
+    }
+  }, [data, isCurrentMonth, currentDate, isReadOnly])
+
+  useEffect(() => {
+    if (!isCurrentMonth || isReadOnly || currentEditablePeriod === 'none') {
+      setHasChanges(false)
+      return
+    }
+
+    const actualChanges = Object.keys(editableAttendance).some(userIndex => {
+      const edited = editableAttendance[userIndex]
+      const server = serverAttendance[userIndex]
+      if (!edited || !server) return false
+      
+      if (currentEditablePeriod === 'morning') return edited.morning !== server.morning
+      else if (currentEditablePeriod === 'evening') return edited.evening !== server.evening
+      return false
+    })
+
+    setHasChanges(actualChanges)
+  }, [editableAttendance, serverAttendance, isCurrentMonth, isReadOnly, currentEditablePeriod])
+
+  const handleAttendanceClick = (userIndex, day, mealType) => {
+    if (!isCurrentMonth || isReadOnly || day !== currentDate || currentEditablePeriod === 'none' || mealType !== currentEditablePeriod) return
+
+    const user = data.attendanceData[userIndex]
+    const currentStatus = editableAttendance[userIndex]?.[mealType]
+    const newStatus = currentStatus === 'p' ? 'a' : 'p'
+    const mealPrice = getMealPriceFromSchedule(mealType)
+    
+    let balanceChange = balanceChanges[userIndex] || 0
+    if (currentStatus === 'a' && newStatus === 'p') balanceChange += mealPrice
+    else if (currentStatus === 'p' && newStatus === 'a') balanceChange -= mealPrice
+    
+    setEditableAttendance(prev => ({ ...prev, [userIndex]: { ...prev[userIndex], [mealType]: newStatus } }))
+    setBalanceChanges(prev => ({ ...prev, [userIndex]: balanceChange }))
+
+    toast.info(`${user.userName}: ${newStatus === 'p' ? `PKR ${mealPrice} added` : 'Marked absent'}`, { position: "top-right", autoClose: 2000 })
+  }
+
+  const getAttendanceStatus = (day, status, userIndex, mealType) => {
+    const isToday = isCurrentMonth && day === currentDate
+    const isPast = isCurrentMonth && day < currentDate
+    const isFuture = isCurrentMonth && day > currentDate
+
+    if (isToday && editableAttendance[userIndex]) status = editableAttendance[userIndex][mealType]
+
+    const isClickable = isToday && !isReadOnly && currentEditablePeriod !== 'none' && mealType === currentEditablePeriod
+
+    if (status === 'p') return { bg: isToday ? 'bg-green-700' : 'bg-green-600', text: 'P', textColor: 'text-white', clickable: isClickable, tooltip: 'Present' }
+    if (status === 'a') return { bg: isToday ? 'bg-orange-600' : 'bg-orange-500', text: 'A', textColor: 'text-white', clickable: isClickable, tooltip: 'Absent' }
+    return { bg: 'bg-slate-100', text: '—', textColor: 'text-slate-400', clickable: false, tooltip: isFuture ? 'Future date' : 'Not yet time' }
+  }
+
+  const getPeriodBadge = () => {
+    if (isBeforeMorningTime) return <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded border border-slate-300 flex items-center gap-1"><Clock className="w-3 h-3" />Before Morning</span>
+    if (isMorningTime) return <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded border border-blue-300 flex items-center gap-1"><Clock className="w-3 h-3" />Morning</span>
+    if (isEveningTime) return <span className="text-xs font-semibold text-purple-700 bg-purple-50 px-3 py-1 rounded border border-purple-300 flex items-center gap-1"><Clock className="w-3 h-3" />Evening</span>
+  }
+
+  if (isLoading) return (<div className="flex items-center justify-center h-64 bg-white border border-slate-200"><div className="flex flex-col items-center gap-3"><div className="w-10 h-10 border-4 border-slate-300 border-t-slate-700 rounded-full animate-spin" /><p className="text-sm text-slate-600 font-medium">Loading...</p></div></div>)
+  if (isError) return (<div className="flex items-center justify-center h-64 bg-white border border-red-200"><div className="text-center"><p className="text-red-700 font-semibold text-lg">Error Loading Data</p><p className="text-sm text-red-600 mt-2">{error?.message}</p></div></div>)
+  if (!data?.attendanceData?.length) return (<div className="flex items-center justify-center h-64 bg-white border border-slate-200"><p className="text-slate-500 text-lg">No attendance data available</p></div>)
 
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-slate-50 p-8 overflow-auto' : 'w-full'}`}>
-      {/* Header Section */}
-      <div className="bg-white border-b-4 border-slate-800 shadow-sm mb-6">
-        <div className="px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="bg-slate-800 p-3">
-                <CalendarDays className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                  Attendance Register
-                </h1>
-                <p className="text-slate-600 font-medium mt-1">
-                  {new Date(year, month - 1).toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    year: 'numeric' 
-                  })} • {data.totalUsers} Users
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleFullscreen}
-              className="border-2 border-slate-300 hover:border-slate-800 hover:bg-slate-100"
-            >
-              {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Table Section */}
-      <div className="bg-white border-2 border-slate-800 shadow-lg overflow-hidden">
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-slate-50 p-2 overflow-auto' : 'w-full'}`}>
+      <TimeDebugger debugTime={debugTime} setDebugTime={setDebugTime} />
+      <AttendanceHeader
+        page={page}
+        limit={limit}
+        totalUsers={data.totalUsers}
+        totalPages={data.totalPages}
+        isCurrentMonth={isCurrentMonth}
+        isReadOnly={isReadOnly}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        currentEditablePeriod={currentEditablePeriod}
+        isFullscreen={isFullscreen}
+        onSave={handleSaveAttendance}
+        onPageChange={onPageChange}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        getPeriodBadge={getPeriodBadge}
+      />
+      <div className="bg-white border border-slate-400 shadow-lg overflow-hidden relative">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-slate-800">
-                <th className="px-6 py-4 text-left text-sm font-bold text-white uppercase tracking-wide border-r-2 border-slate-700 sticky left-0 bg-slate-800 z-10 min-w-[180px]">
-                  Name
-                </th>
+                <th className="px-3 py-2 text-left text-xs font-bold text-white uppercase tracking-wide border-r-2 border-slate-700 sticky left-0 bg-slate-800 z-10 min-w-24">Name</th>
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
                   const isToday = isCurrentMonth && day === currentDate
-                  return (
-                    <th 
-                      key={day} 
-                      className={`px-3 py-4 text-center text-sm font-bold uppercase tracking-wide border-r border-slate-700 min-w-[65px] ${
-                        isToday 
-                          ? 'bg-blue-700 text-white' 
-                          : 'text-white'
-                      }`}
-                    >
-                      {day}
-                    </th>
-                  )
+                  const isPast = isCurrentMonth && day < currentDate
+                  return (<th key={day} className={`px-1 py-2 text-center text-xs font-bold uppercase tracking-wide border-r border-slate-700 min-w-10 ${isToday ? 'bg-blue-700 text-white' : isPast ? 'bg-slate-700 text-slate-300' : 'text-white'}`}>{day}</th>)
                 })}
-                <th className="px-6 py-4 text-center text-sm font-bold text-white uppercase tracking-wide min-w-[140px]">
-                  Total Bill
-                </th>
+                <th className="px-3 py-2 text-center text-xs font-bold text-white uppercase tracking-wide min-w-28">Bill Remaining</th>
               </tr>
             </thead>
-            <tbody>
-              {data.attendanceData.map((user, userIndex) => (
-                <tr 
-                  key={userIndex} 
-                  className="border-b-2 border-slate-200 hover:bg-slate-50 transition-colors"
-                >
-                  <td className="px-6 py-3 border-r-2 border-slate-200 sticky left-0 bg-white z-10">
-                    <p className="font-bold text-slate-900 text-base">{user.userName}</p>
-                  </td>
-                  {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
-                    const morningStatus = user.morningAttendance[day - 1]
-                    const eveningStatus = user.eveningAttendance[day - 1]
-                    const isToday = isCurrentMonth && day === currentDate
-                    const morning = getAttendanceStatus(morningStatus, isToday)
-                    const evening = getAttendanceStatus(eveningStatus, isToday)
-
-                    return (
-                      <td 
-                        key={day} 
-                        className={`px-3 py-3 border-r border-slate-200 ${
-                          isToday ? 'bg-blue-50' : ''
-                        }`}
-                      >
-                        <div className="flex flex-col gap-1.5 items-center">
-                          <div className={`${morning.bg} ${morning.textColor} w-9 h-7 flex items-center justify-center text-xs font-bold border border-slate-800`}>
-                            {morning.text}
-                          </div>
-                          <div className={`${evening.bg} ${evening.textColor} w-9 h-7 flex items-center justify-center text-xs font-bold border border-slate-800`}>
-                            {evening.text}
-                          </div>
-                        </div>
-                      </td>
-                    )
-                  })}
-                  <td className="px-6 py-3 text-center bg-slate-50">
-                    <div className="flex flex-col items-center gap-1">
-                      <p className="font-bold text-slate-900 text-lg">
-                        ₹{user.summary.totalAmount.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-slate-600 font-medium">
-                        {user.summary.totalMeals} meals
-                      </p>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+            <AttendanceTableBody
+              data={data}
+              daysInMonth={daysInMonth}
+              isCurrentMonth={isCurrentMonth}
+              currentDate={currentDate}
+              balanceChanges={balanceChanges}
+              getAttendanceStatus={getAttendanceStatus}
+              handleAttendanceClick={handleAttendanceClick}
+            />
           </table>
         </div>
       </div>
-
-      {/* Footer Section */}
-      <div className="mt-6 bg-white border-2 border-slate-800 shadow-sm">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <p className="text-sm text-slate-700 font-medium">
-            Showing {((page - 1) * limit) + 1}–{Math.min(page * limit, data.totalUsers)} of {data.totalUsers} users
-          </p>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-              className="h-9 px-4 border-2 border-slate-800 hover:bg-slate-800 hover:text-white font-bold disabled:opacity-40"
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Previous
-            </Button>
-            <span className="text-sm font-bold text-slate-900 px-3 py-1 bg-slate-100 border-2 border-slate-800">
-              {page} / {data.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= data.totalPages}
-              className="h-9 px-4 border-2 border-slate-800 hover:bg-slate-800 hover:text-white font-bold disabled:opacity-40"
-            >
-              Next
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div className="mt-6 bg-white border-2 border-slate-800 shadow-sm">
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-8 flex-wrap">
-            <span className="text-sm font-bold text-slate-900 uppercase tracking-wide">Legend:</span>
-            <div className="flex items-center gap-2">
-              <div className="bg-green-600 text-white w-9 h-7 flex items-center justify-center text-xs font-bold border border-slate-800">
-                P
-              </div>
-              <span className="text-sm text-slate-700 font-medium">Present</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-orange-500 text-white w-9 h-7 flex items-center justify-center text-xs font-bold border border-slate-800">
-                A
-              </div>
-              <span className="text-sm text-slate-700 font-medium">Absent</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-slate-50 text-slate-300 w-9 h-7 flex items-center justify-center text-xs font-bold border border-slate-800">
-                —
-              </div>
-              <span className="text-sm text-slate-700 font-medium">No Record</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-700 text-white px-3 h-7 flex items-center justify-center text-xs font-bold border border-slate-800">
-                TODAY
-              </div>
-              <span className="text-sm text-slate-700 font-medium">Current Date</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <AttendanceLegend
+        currentEditablePeriod={currentEditablePeriod}
+        isMorningTime={isMorningTime}
+        isEveningTime={isEveningTime}
+        isBeforeMorningTime={isBeforeMorningTime}
+      />
     </div>
   )
 }

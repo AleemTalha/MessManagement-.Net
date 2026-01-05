@@ -133,15 +133,15 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
 
   return (
     <div className="fixed h-screen inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 md:p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-700">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200">
         
         {/* Header */}
-        <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex justify-between items-center">
+        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-              <Utensils className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Utensils className="h-8 w-8 text-blue-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+            <h2 className="text-2xl font-bold text-slate-800">
               {meal ? "Edit Meal" : "Add New Meal"}
             </h2>
           </div>
@@ -154,7 +154,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
           {/* Image Upload */}
           <div className="flex justify-center">
             {formData.image?.url ? (
-              <div className="relative w-56 h-56 rounded-lg overflow-hidden border-2 border-slate-300 dark:border-slate-600">
+              <div className="relative w-56 h-56 rounded-lg overflow-hidden border-2 border-slate-300">
                 <Image src={formData.image.url} alt="Meal preview" fill className="object-cover" unoptimized />
                 {isUploading && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -175,13 +175,13 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
             ) : (
               <label className={`w-56 h-56 flex flex-col items-center justify-center border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer ${
                 isPending || isUploading
-                  ? "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 opacity-50"
-                  : "border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  ? "border-slate-200 bg-slate-50 opacity-50"
+                  : "border-slate-300 bg-slate-50 hover:border-blue-400 hover:bg-blue-50"
               }`}>
-                <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded-full mb-2">
-                  <PhotoIcon className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                <div className="p-4 bg-blue-100 rounded-full mb-2">
+                  <PhotoIcon className="h-10 w-10 text-blue-600" />
                 </div>
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span className="text-sm font-medium text-slate-700">
                   Click to upload
                 </span>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" disabled={isPending || isUploading} />
@@ -192,7 +192,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
           {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-semibold text-slate-700">
                 Meal Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -206,7 +206,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-semibold text-slate-700">
                 Weight (grams) <span className="text-red-500">*</span>
               </label>
               <Input
@@ -221,7 +221,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-semibold text-slate-700">
                 Price <span className="text-red-500">*</span>
               </label>
               <Input
@@ -236,7 +236,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label className="block text-sm font-semibold text-slate-700">
                 Availability
               </label>
               <select
@@ -245,7 +245,7 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
                   setFormData({ ...formData, isAvailable: e.target.value === "available" })
                 }
                 disabled={isPending}
-                className="h-10 w-full px-3 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-10 w-full px-3 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="available">Available</option>
                 <option value="unavailable">Unavailable</option>
@@ -254,26 +254,26 @@ export default function MealModal({ isOpen, onClose, meal, onSubmit, isPending }
           </div>
 
           <div className="space-y-1">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-sm font-semibold text-slate-700">
               Description
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               disabled={isPending}
-              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               rows="3"
             />
           </div>
 
           {/* Footer */}
-          <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex gap-3 pt-4 border-t border-slate-200">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={isPending}
-              className="flex-1 h-11 border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium"
+              className="flex-1 h-11 border-slate-300 hover:bg-slate-50 font-medium"
             >
               Cancel
             </Button>
