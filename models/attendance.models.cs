@@ -83,7 +83,8 @@ namespace MessManagement.Models
         public DateTime Date { get; set; }
         
         public bool MorningMealTaken { get; set; } = false;
-        public int? MorningMealId { get; set; }
+        public string MorningMealName { get; set; } = string.Empty;
+        public decimal MorningMealPrice { get; set; } = 0;
         private decimal morningChargedAmount = 0;
         public decimal MorningChargedAmount
         {
@@ -96,7 +97,8 @@ namespace MessManagement.Models
         }
         
         public bool EveningMealTaken { get; set; } = false;
-        public int? EveningMealId { get; set; }
+        public string EveningMealName { get; set; } = string.Empty;
+        public decimal EveningMealPrice { get; set; } = 0;
         private decimal eveningChargedAmount = 0;
         public decimal EveningChargedAmount
         {

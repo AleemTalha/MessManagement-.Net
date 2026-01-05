@@ -70,6 +70,8 @@ namespace MessManagement.Routes
                     user.CurrentMonthAttendanceId = monthlyAttendance.Id;
                     await db.SaveChangesAsync();
 
+                    Console.WriteLine($"User created successfully: {user.Id}");
+
                     return Results.Created($"/api/admin/users/{user.Id}", new
                     {
                         id = user.Id,
@@ -89,15 +91,17 @@ namespace MessManagement.Routes
                 }
                 catch (ArgumentException ex)
                 {
+                    Console.WriteLine($"Validation error during user creation: {ex.Message}");
                     return Results.BadRequest(new { message = ex.Message });
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Internal error during user creation: {ex.Message}");
                     return Results.Problem(new ProblemDetails
                     {
                         Status = 500,
                         Title = "Internal Server Error",
-                        Detail = ex.Message
+                        Detail = "An unexpected error occurred while creating the user."
                     });
                 }
             });
@@ -119,6 +123,7 @@ namespace MessManagement.Routes
                     var totalUsers = await db.Users.CountAsync();
                     
                     var users = await db.Users
+                        .AsNoTracking()
                         .OrderByDescending(u => u.CreatedAt)
                         .Skip(skip)
                         .Take(limit)
@@ -136,11 +141,17 @@ namespace MessManagement.Routes
                             isActive = u.IsActive,
                             attendanceStartDate = u.AttendanceStartDate,
                             currentMonthAttendanceId = u.CurrentMonthAttendanceId,
-                            profilePicture = u.ProfilePicture,
+                            profilePicture = new
+                            {
+                                publicId = u.ProfilePicture.PublicId,
+                                url = u.ProfilePicture.Url
+                            },
                             createdAt = u.CreatedAt,
                             updatedAt = u.UpdatedAt
                         })
                         .ToListAsync();
+
+                    Console.WriteLine($"Retrieved {users.Count} users, total: {totalUsers}");
 
                     return Results.Ok(new
                     {
@@ -152,11 +163,12 @@ namespace MessManagement.Routes
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Internal error during user retrieval: {ex.Message}");
                     return Results.Problem(new ProblemDetails
                     {
                         Status = 500,
                         Title = "Internal Server Error",
-                        Detail = ex.Message
+                        Detail = "An unexpected error occurred while retrieving users."
                     });
                 }
             });
@@ -214,6 +226,8 @@ namespace MessManagement.Routes
                     user.UpdateTimestamp();
                     await db.SaveChangesAsync();
 
+                    Console.WriteLine($"User updated successfully: {user.Id}");
+
                     return Results.Ok(new
                     {
                         id = user.Id,
@@ -231,15 +245,17 @@ namespace MessManagement.Routes
                 }
                 catch (ArgumentException ex)
                 {
+                    Console.WriteLine($"Validation error during user update for ID {id}: {ex.Message}");
                     return Results.BadRequest(new { message = ex.Message });
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Internal error during user update for ID {id}: {ex.Message}");
                     return Results.Problem(new ProblemDetails
                     {
                         Status = 500,
                         Title = "Internal Server Error",
-                        Detail = ex.Message
+                        Detail = "An unexpected error occurred while updating the user."
                     });
                 }
             });
@@ -263,15 +279,18 @@ namespace MessManagement.Routes
                     db.Users.Remove(user);
                     await db.SaveChangesAsync();
 
+                    Console.WriteLine($"User deleted successfully: {id}");
+
                     return Results.Ok(new { message = "User deleted successfully." });
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"Internal error during user deletion for ID {id}: {ex.Message}");
                     return Results.Problem(new ProblemDetails
                     {
                         Status = 500,
                         Title = "Internal Server Error",
-                        Detail = ex.Message
+                        Detail = "An unexpected error occurred while deleting the user."
                     });
                 }
             });

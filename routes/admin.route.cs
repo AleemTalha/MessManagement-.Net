@@ -20,6 +20,7 @@ namespace MessManagement.Routes
             admin.MapScheduleRoutes();
             admin.MapUploadRoutes();
             admin.MapUserRoutes();
+            admin.MapAttendanceRoutes();
 
             admin.MapGet("/profile", (HttpContext context) =>
             {
