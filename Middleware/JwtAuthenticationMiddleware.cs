@@ -138,6 +138,7 @@ namespace MessManagement.Middleware
             {
                 _logger.LogError(ex, "Error during JWT authentication");
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                Console.WriteLine(ex);
                 await context.Response.WriteAsJsonAsync(new { message = "Authentication error" });
                 return;
             }

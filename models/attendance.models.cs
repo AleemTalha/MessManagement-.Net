@@ -82,6 +82,10 @@ namespace MessManagement.Models
         
         public DateTime Date { get; set; }
         
+        // Flags to track if attendance has been explicitly marked
+        public bool MorningIsMarked { get; set; } = false;
+        public bool EveningIsMarked { get; set; } = false;
+        
         public bool MorningMealTaken { get; set; } = false;
         public string MorningMealName { get; set; } = string.Empty;
         public decimal MorningMealPrice { get; set; } = 0;
