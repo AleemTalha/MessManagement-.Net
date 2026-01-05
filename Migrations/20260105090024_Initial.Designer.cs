@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backned.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251221203327_AddMonthlyAttendanceAndUserTracking")]
-    partial class AddMonthlyAttendanceAndUserTracking
+    [Migration("20260105090024_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -470,8 +470,12 @@ namespace backned.Migrations
                             b1.Property<decimal>("EveningChargedAmount")
                                 .HasColumnType("decimal(18,2)");
 
-                            b1.Property<int?>("EveningMealId")
-                                .HasColumnType("integer");
+                            b1.Property<string>("EveningMealName")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<decimal>("EveningMealPrice")
+                                .HasColumnType("numeric");
 
                             b1.Property<bool>("EveningMealTaken")
                                 .HasColumnType("boolean");
@@ -479,8 +483,12 @@ namespace backned.Migrations
                             b1.Property<decimal>("MorningChargedAmount")
                                 .HasColumnType("decimal(18,2)");
 
-                            b1.Property<int?>("MorningMealId")
-                                .HasColumnType("integer");
+                            b1.Property<string>("MorningMealName")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<decimal>("MorningMealPrice")
+                                .HasColumnType("numeric");
 
                             b1.Property<bool>("MorningMealTaken")
                                 .HasColumnType("boolean");

@@ -7,32 +7,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backned.Migrations
 {
     /// <inheritdoc />
-    public partial class SingleMealSchedule : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Attendances",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<int>(type: "integer", nullable: false),
-                    MealId = table.Column<int>(type: "integer", nullable: false),
-                    Date = table.Column<DateTime>(type: "date", nullable: false),
-                    MealTime = table.Column<int>(type: "integer", nullable: false),
-                    WasTaken = table.Column<bool>(type: "boolean", nullable: false),
-                    ChargedAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
-                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Attendances", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Bills",
                 columns: table => new
@@ -95,6 +74,25 @@ namespace backned.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MonthlyAttendances",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Month = table.Column<int>(type: "integer", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    TotalMonthlyBill = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    TotalMealsTaken = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MonthlyAttendances", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -181,7 +179,9 @@ namespace backned.Migrations
                     Address = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     MessId = table.Column<int>(type: "integer", nullable: true),
                     ProfilePicture_PublicId = table.Column<string>(type: "text", nullable: false),
-                    ProfilePicture_Url = table.Column<string>(type: "text", nullable: false)
+                    ProfilePicture_Url = table.Column<string>(type: "text", nullable: false),
+                    CurrentMonthAttendanceId = table.Column<int>(type: "integer", nullable: true),
+                    AttendanceStartDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -217,10 +217,46 @@ namespace backned.Migrations
                     table.PrimaryKey("PK_WeekSchedules", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "DailyAttendance",
+                columns: table => new
+                {
+                    MonthlyAttendanceId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Day = table.Column<int>(type: "integer", nullable: false),
+                    Date = table.Column<DateTime>(type: "date", nullable: false),
+                    MorningMealTaken = table.Column<bool>(type: "boolean", nullable: false),
+                    MorningMealName = table.Column<string>(type: "text", nullable: false),
+                    MorningMealPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    MorningChargedAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    EveningMealTaken = table.Column<bool>(type: "boolean", nullable: false),
+                    EveningMealName = table.Column<string>(type: "text", nullable: false),
+                    EveningMealPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    EveningChargedAmount = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyAttendance", x => new { x.MonthlyAttendanceId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_DailyAttendance_MonthlyAttendances_MonthlyAttendanceId",
+                        column: x => x.MonthlyAttendanceId,
+                        principalTable: "MonthlyAttendances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Attendances_UserId_Date_MealTime",
-                table: "Attendances",
-                columns: new[] { "UserId", "Date", "MealTime" },
+                name: "IX_DailyAttendance_Date",
+                table: "DailyAttendance",
+                column: "Date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MonthlyAttendances_UserId_Month_Year",
+                table: "MonthlyAttendances",
+                columns: new[] { "UserId", "Month", "Year" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -240,10 +276,10 @@ namespace backned.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Attendances");
+                name: "Bills");
 
             migrationBuilder.DropTable(
-                name: "Bills");
+                name: "DailyAttendance");
 
             migrationBuilder.DropTable(
                 name: "Meals");
@@ -265,6 +301,9 @@ namespace backned.Migrations
 
             migrationBuilder.DropTable(
                 name: "WeekSchedules");
+
+            migrationBuilder.DropTable(
+                name: "MonthlyAttendances");
         }
     }
 }
