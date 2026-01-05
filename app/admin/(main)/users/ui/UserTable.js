@@ -29,7 +29,7 @@ export default function UserTable({
           <p className="text-slate-600 dark:text-slate-500 mb-4">{error.message}</p>
           <Button
             onClick={onRetry}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Try Again
           </Button>
@@ -107,8 +107,8 @@ export default function UserTable({
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                        <span className="text-green-700 font-semibold text-sm">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <span className="text-blue-700 font-semibold text-sm">
                           {user.name?.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -137,7 +137,7 @@ export default function UserTable({
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         user.role === "Admin"
                           ? "bg-purple-100 text-purple-800"
-                          : "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
                       }`}
                     >
                       {user.role}
@@ -147,7 +147,7 @@ export default function UserTable({
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         user.isActive
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-blue-100 text-blue-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
@@ -166,7 +166,7 @@ export default function UserTable({
                       onClick={() => onEdit(user)}
                       variant="ghost"
                       size="sm"
-                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       disabled={isDeleting}
                     >
                       <Pencil className="h-4 w-4" />
