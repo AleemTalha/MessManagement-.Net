@@ -126,3 +126,18 @@
   background-color: rgb(71 85 105);
   border-radius: 2px;
 }
+
+@keyframes spinAxis {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-axis {
+  animation: spinAxis 18s linear infinite;
+  transform-origin: center center;
+  filter: drop-shadow(0 0 28px rgba(251, 191, 36, 0.28));
+}

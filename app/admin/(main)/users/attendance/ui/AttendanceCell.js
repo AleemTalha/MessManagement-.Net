@@ -16,7 +16,7 @@ export default function AttendanceCell({
         >
           {morning.text}
         </div>
-      ) : (
+      ) : morning.tooltip ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -31,6 +31,12 @@ export default function AttendanceCell({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      ) : (
+        <div 
+          className={`${morning.bg} ${morning.textColor} w-6 h-5 flex items-center justify-center text-xs font-bold border border-slate-700`}
+        >
+          {morning.text}
+        </div>
       )}
       
       {evening.clickable ? (
@@ -40,7 +46,7 @@ export default function AttendanceCell({
         >
           {evening.text}
         </div>
-      ) : (
+      ) : evening.tooltip ? (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -55,6 +61,12 @@ export default function AttendanceCell({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      ) : (
+        <div 
+          className={`${evening.bg} ${evening.textColor} w-6 h-5 flex items-center justify-center text-xs font-bold border border-slate-700`}
+        >
+          {evening.text}
+        </div>
       )}
     </div>
   )

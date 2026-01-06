@@ -26,7 +26,7 @@ export default function AttendanceTableBody({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <p className="font-semibold text-slate-900 text-sm truncate max-w-20 cursor-pointer">
+                    <p className="font-semibold text-slate-900 text-sm truncate max-w-40 cursor-pointer">
                       {user.userName}
                     </p>
                   </TooltipTrigger>
@@ -67,24 +67,23 @@ export default function AttendanceTableBody({
             
             <td className="px-3 py-2 text-center bg-slate-50">
               <div className="flex flex-col items-center gap-2">
-                <div className="text-center">
-                  <p className={`text-lg font-bold ${balanceChange !== 0 ? 'text-blue-600' : 'text-slate-900'}`}>
-                    PKR {adjustedBillRemaining.toFixed(2)}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Bill Remaining
-                  </p>
-                  {balanceChange !== 0 && (
-                    <p className={`text-xs font-semibold ${balanceChange > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {balanceChange > 0 ? '+' : ''}{balanceChange.toFixed(2)} (unsaved)
-                    </p>
-                  )}
-                </div>
-                <div className="w-full pt-2 border-t border-slate-200">
-                  <p className="text-xs text-slate-600">
-                    {user.summary?.totalMeals || 0} meals taken
-                  </p>
-                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="text-center cursor-pointer">
+                        <p className="text-lg font-bold text-slate-900">
+                          PKR {adjustedBillRemaining.toFixed(2)}
+                        </p>
+                        {/* <p className="text-xs text-slate-500 mt-0.5">
+                          Bill Remaining
+                        </p> */}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{user.summary?.totalMeals || 0} meals taken</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </td>
           </tr>
