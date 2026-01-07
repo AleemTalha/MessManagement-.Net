@@ -48,13 +48,14 @@ namespace MessManagement.Routes
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.None,
-                        Domain = ".onrender.com",
+                        Secure = true, // must be HTTPS in Render deployment
+                        SameSite = SameSiteMode.None, // cross-subdomain allowed
+                        Domain = ".onrender.com", // matches all subdomains
                         Expires = DateTimeOffset.UtcNow.AddMinutes(expiryInMinutes),
                         Path = "/"
                     };
-
+                    Console.WriteLine("Cookies are being set with domain: " + cookieOptions.Domain  + " and Secure: " + cookieOptions.Secure);
+                    Console.WriteLine("Token: " + token);
                     httpContext.Response.Cookies.Append("accessToken", token, cookieOptions);
 
                     return Results.Ok(new

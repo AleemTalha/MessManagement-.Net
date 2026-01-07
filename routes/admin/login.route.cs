@@ -39,7 +39,7 @@ namespace MessManagement.Routes
                         return Results.Json(new { message = "Invalid email or password" }, statusCode: 401);
 
                     if (!adminUser.IsActive)
-                        return Results.Json(new { message = "Account is inactive. Please contact admin." }, statusCode: 403);
+                        return Results.Json(new { message = "Account is inactive. Please contact super admin." }, statusCode: 403);
 
                     var token = JwtUtils.GenerateJwtToken(adminUser, configuration);
                     SessionUtils.SetUserSession(httpContext.Session, adminUser.Id, adminUser.Name, adminUser.Role, adminUser.Email);
