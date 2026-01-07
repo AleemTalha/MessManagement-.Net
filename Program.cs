@@ -3,6 +3,7 @@ using MessManagement.Middleware;
 using MessManagement.Routes;
 using MessManagement.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Text.Json;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
@@ -29,20 +30,28 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[] { };
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendOnly", policy =>
     {
-        policy
-            .WithOrigins(allowedOrigins)
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
+builder.Services.AddScoped<JwtAuthenticationMiddleware>();
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -60,13 +69,26 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogCritical(ex, "Neon PostgreSQL connection ERROR");
     }
+
+    foreach (var origin in allowedOrigins)
+    {
+        logger.LogInformation("Frontend allowed origin: {Origin}", origin);
+    }
 }
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("FrontendOnly");
 app.UseSession();
-app.UseMiddleware<JwtAuthenticationMiddleware>();
+
+app.UseWhen(context =>
+{
+    var path = context.Request.Path.Value?.ToLower();
+    return !(path == "/" || path == "/hello" || path == "/api/user/login" || path == "/api/admin/login" || context.Request.Method == "OPTIONS");
+}, appBuilder =>
+{
+    appBuilder.UseMiddleware<JwtAuthenticationMiddleware>();
+});
 
 app.MapApiRoutes();
 
