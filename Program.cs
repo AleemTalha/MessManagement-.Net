@@ -30,7 +30,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
     options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-    options.Cookie.Domain = ".onrender.com";
+    options.Cookie.Domain = "messmanagement-net.onrender.com";
 });
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new string[] { };
@@ -84,6 +84,7 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("FrontendOnly");
 app.UseSession();
 
+// JWT Middleware Conditional
 app.UseWhen(context =>
 {
     var path = context.Request.Path.Value?.ToLower();
@@ -95,7 +96,4 @@ app.UseWhen(context =>
 
 app.MapApiRoutes();
 
-app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
-
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
-app.Run($"http://0.0.0.0:{port}");
+// Pu

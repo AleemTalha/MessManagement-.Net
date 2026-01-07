@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MessManagement.Data;
-using MessManagement.Routes;
 using MessManagement.Utils;
 
 namespace MessManagement.Routes
@@ -39,33 +38,34 @@ namespace MessManagement.Routes
                     var trimmedPassword = dto.Password.Trim();
                     Console.WriteLine($"Trying to authenticate user: {trimmedEmail}");
 
-                    var user = await dbContext.Users
+                    var userEntity = await dbContext.Users
                         .FirstOrDefaultAsync(u => u.Email == trimmedEmail && u.Password == trimmedPassword && u.Role == "User");
 
-                    if (user == null)
+                    if (userEntity == null)
                     {
                         Console.WriteLine($"Login failed: Invalid credentials for {trimmedEmail}");
                         return Results.Json(new { message = "Invalid email or password" }, statusCode: 401);
                     }
 
-                    if (!user.IsActive)
+                    if (!userEntity.IsActive)
                     {
                         Console.WriteLine($"Login failed: User {trimmedEmail} is inactive");
                         return Results.Json(new { message = "Account is inactive. Please contact admin." }, statusCode: 403);
                     }
 
-                    var token = JwtUtils.GenerateJwtToken(user, configuration);
+                    var token = JwtUtils.GenerateJwtToken(userEntity, configuration);
                     Console.WriteLine($"JWT token generated for user: {trimmedEmail}");
 
-                    SessionUtils.SetUserSession(httpContext.Session, user.Id, user.Name, user.Role, user.Email);
+                    SessionUtils.SetUserSession(httpContext.Session, userEntity.Id, userEntity.Name, userEntity.Role, userEntity.Email);
                     Console.WriteLine($"Session created for user: {trimmedEmail}");
 
                     var expiryInMinutes = int.Parse(configuration["JwtSettings:expiryInMinutes"] ?? "60");
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false, // Set to false for localhost development
-                        SameSite = SameSiteMode.Lax, // Use Lax instead of Strict for cross-origin
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Domain = "messmanagement-net.onrender.com",
                         Expires = DateTimeOffset.UtcNow.AddMinutes(expiryInMinutes),
                         Path = "/"
                     };
@@ -78,10 +78,10 @@ namespace MessManagement.Routes
                         token = token,
                         user = new
                         {
-                            id = user.Id,
-                            name = user.Name,
-                            email = user.Email,
-                            role = user.Role
+                            id = userEntity.Id,
+                            name = userEntity.Name,
+                            email = userEntity.Email,
+                            role = userEntity.Role
                         }
                     });
                 }
@@ -106,8 +106,9 @@ namespace MessManagement.Routes
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false,
-                        SameSite = SameSiteMode.Lax,
+                        Secure = true,
+                        SameSite = SameSiteMode.None,
+                        Domain = "messmanagement-net.onrender.com",
                         Expires = DateTimeOffset.UtcNow.AddDays(-1),
                         Path = "/"
                     };
