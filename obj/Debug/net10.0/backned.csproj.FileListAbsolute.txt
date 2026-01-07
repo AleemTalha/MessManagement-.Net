@@ -187,3 +187,13 @@
 /Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll
 /Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/CloudinaryDotNet.dll
 /Users/apple/Desktop/Web/Mess Management/backend/obj/Debug/net10.0/backned.sourcelink.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/BuildHost-net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.exe.config
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll.config
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/web.config
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/appsettings.Development.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/appsettings.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/backned.deps.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/backned.runtimeconfig.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/backned.staticwebassets.endpoints.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.deps.json
+/Users/apple/Desktop/Web/Mess Management/backend/bin/Debug/net10.0/publish/BuildHost-netcore/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.runtimeconfig.json

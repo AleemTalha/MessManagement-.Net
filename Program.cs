@@ -9,22 +9,18 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Cloudinary service
 builder.Services.AddSingleton<CloudinaryService>();
 
-// JSON options
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.SerializerOptions.WriteIndented = true;
 });
 
-// Session and cache
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -33,13 +29,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// CORS - allow all origins for production (without credentials)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("FrontendOnly", policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins("https://messmanagement-net-idc7.onrender.com")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -47,7 +42,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Check DB connection
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -58,7 +52,7 @@ using (var scope = app.Services.CreateScope())
         if (dbContext.Database.CanConnect())
             logger.LogInformation("Neon PostgreSQL connection SUCCESSFUL");
         else
-            logger.LogError("Neon PostgreSQL connection FAILED (CanConnect returned false)");
+            logger.LogError("Neon PostgreSQL connection FAILED");
     }
     catch (Exception ex)
     {
@@ -66,20 +60,15 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Middleware
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseCors("AllowAll");
+app.UseCors("FrontendOnly");
 app.UseSession();
 app.UseMiddleware<JwtAuthenticationMiddleware>();
 
-// API routes
 app.MapApiRoutes();
 
-// Basic test route
 app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
 
-// Run app
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
-var url = $"http://0.0.0.0:{port}";
-app.Run(url);
+app.Run($"http://0.0.0.0:{port}");
