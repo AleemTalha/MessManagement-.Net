@@ -5,7 +5,6 @@ using MessManagement.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
-// Enable DateTime UTC handling for PostgreSQL
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,4 +73,8 @@ app.UseCors("AllowFrontend");
 app.UseSession();
 app.UseMiddleware<JwtAuthenticationMiddleware>();
 app.MapApiRoutes();
+
+// Basic Hello World route for testing
+app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
+
 app.Run();
