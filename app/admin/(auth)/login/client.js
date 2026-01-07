@@ -1,6 +1,6 @@
 "use client";
 
-const backend_uri = process.env.NEXT_PUBLIC_BACKEND_URI || "https://messmanagement-net-1.onrender.com";
+const backend_uri = process.env.NEXT_PUBLIC_BACKEND_URI || "https://messmanagement-net.onrender.com";
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
