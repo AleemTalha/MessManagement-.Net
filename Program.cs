@@ -52,48 +52,57 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 builder.Services.AddScoped<JwtAuthenticationMiddleware>();
 
-var app = builder.Build();
-
-app.UseForwardedHeaders();
-
-using (var scope = app.Services.CreateScope())
+try
 {
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var app = builder.Build();
 
-    try
+    app.UseForwardedHeaders();
+
+    using (var scope = app.Services.CreateScope())
     {
-        if (dbContext.Database.CanConnect())
-            logger.LogInformation("Neon PostgreSQL connection SUCCESSFUL");
-        else
-            logger.LogError("Neon PostgreSQL connection FAILED");
-    }
-    catch (Exception ex)
-    {
-        logger.LogCritical(ex, "Neon PostgreSQL connection ERROR");
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        try
+        {
+            if (dbContext.Database.CanConnect())
+                logger.LogInformation("Neon PostgreSQL connection SUCCESSFUL");
+            else
+                logger.LogError("Neon PostgreSQL connection FAILED");
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, "Neon PostgreSQL connection ERROR");
+        }
+
+        foreach (var origin in allowedOrigins)
+        {
+            logger.LogInformation("Frontend allowed origin: {Origin}", origin);
+        }
     }
 
-    foreach (var origin in allowedOrigins)
+    app.UseMiddleware<RequestLoggingMiddleware>();
+    app.UseMiddleware<ErrorHandlingMiddleware>();
+    app.UseCors("FrontendOnly");
+    app.UseSession();
+
+    app.UseWhen(context =>
     {
-        logger.LogInformation("Frontend allowed origin: {Origin}", origin);
-    }
+        var path = context.Request.Path.Value?.ToLower();
+        return !(path == "/" || path == "/hello" || path == "/api/user/login" || path == "/api/admin/login" || context.Request.Method == "OPTIONS");
+    }, appBuilder =>
+    {
+        appBuilder.UseMiddleware<JwtAuthenticationMiddleware>();
+    });
+
+    app.MapApiRoutes();
+
+    app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
+
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
+    app.Run($"http://0.0.0.0:{port}");
 }
-
-app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseCors("FrontendOnly");
-app.UseSession();
-
-// JWT Middleware Conditional
-app.UseWhen(context =>
+catch (Exception ex)
 {
-    var path = context.Request.Path.Value?.ToLower();
-    return !(path == "/" || path == "/hello" || path == "/api/user/login" || path == "/api/admin/login" || context.Request.Method == "OPTIONS");
-}, appBuilder =>
-{
-    appBuilder.UseMiddleware<JwtAuthenticationMiddleware>();
-});
-
-app.MapApiRoutes();
-
-// Pu
+    Console.WriteLine("Startup crash: " + ex);
+}
