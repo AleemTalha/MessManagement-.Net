@@ -81,7 +81,7 @@ export default function AdminLogin() {
           <div className="pb-8">
             <div className="mx-auto inline-flex items-center justify-center w-full h-40">
               <Image
-                src="/assets/logo.png"
+                src="/assets/logo.webp"
                 className=""
                 alt="Admin Logo"
                 width={200}
