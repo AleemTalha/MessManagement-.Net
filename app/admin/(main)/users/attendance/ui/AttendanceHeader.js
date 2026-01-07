@@ -1,6 +1,9 @@
 "use client"
-import { Save, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from "lucide-react"
+import { Save, ChevronLeft, ChevronRight, Maximize2, Minimize2, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useGenerateBill } from "@/utils/useBills"
+import { useRouter } from "next/navigation"
+import { toast } from "react-toastify"
 
 export default function AttendanceHeader({
   page,
@@ -16,8 +19,64 @@ export default function AttendanceHeader({
   onSave,
   onPageChange,
   onToggleFullscreen,
-  getPeriodBadge
+  getPeriodBadge,
+  month,
+  year,
+  users
 }) {
+  const generateBill = useGenerateBill()
+  const router = useRouter()
+
+  const handleGenerateBills = async () => {
+    if (!users || users.length === 0) {
+      toast.error("No users found")
+      return
+    }
+
+    const currentDate = new Date()
+    const currentMonthNum = currentDate.getMonth() + 1
+    const currentYearNum = currentDate.getFullYear()
+
+    if (month !== currentMonthNum || year !== currentYearNum) {
+      toast.error("Can only generate bills for current month")
+      return
+    }
+
+    try {
+      let successCount = 0
+      let errorCount = 0
+
+      for (const user of users) {
+        try {
+          await generateBill.mutateAsync({
+            userId: user.userId,
+            month: currentMonthNum,
+            year: currentYearNum
+          })
+          successCount++
+        } catch (error) {
+          // If bill already exists, it's not an error for the user
+          if (error.message.includes("already exists")) {
+            successCount++
+          } else {
+            errorCount++
+            console.error(`Failed to generate bill for user ${user.userId}:`, error)
+          }
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Bills generated for ${successCount} users`)
+        router.push("/admin/bills")
+      }
+      if (errorCount > 0) {
+        toast.error(`Failed to generate bills for ${errorCount} users`)
+      }
+    } catch (error) {
+      toast.error("Failed to generate bills")
+    }
+  }
+
   return (
     <div className="mb-4 bg-white border border-slate-200">
       <div className="px-4 py-3 flex items-center justify-between gap-3">
@@ -47,6 +106,27 @@ export default function AttendanceHeader({
         </div>
 
         <div className="flex items-center gap-2">
+
+          {isCurrentMonth && (
+            <Button
+              size="sm"
+              onClick={handleGenerateBills}
+              disabled={generateBill.isPending}
+              className="
+                h-8 px-2 md:px-3
+                bg-blue-600 text-white
+                hover:bg-blue-700
+                border border-blue-600
+                font-medium
+                disabled:bg-blue-300 disabled:text-blue-500
+              "
+            >
+              <FileText className="w-4 h-4" />
+              <span className="hidden md:inline ml-1">
+                {generateBill.isPending ? "Generating..." : "Generate Bills"}
+              </span>
+            </Button>
+          )}
 
           {!isReadOnly && currentEditablePeriod !== "none" && (
             <Button

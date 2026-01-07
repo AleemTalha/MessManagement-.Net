@@ -23,7 +23,7 @@ return (
             <section className=" bg-slate-900/80 min-h-screen">
                 <div className="grid grid-cols-1 lg:grid-cols-10 min-h-screen max-h-[80vh] lg:max-h-screen">
                     <div className="col-span-6 p-4 sm:p-5">
-                        <div className="flex flex-col justify-center items-center text-center h-full px-4 sm:px-8 py-8 lg:py-0">
+                        <div className="flex flex-col justify-center text-center lg:text-left h-full px-4 sm:px-8 py-8 lg:py-0">
                             <h1
                                 className="text-4xl md:text-5xl lg:text-7xl flex flex-col font-bold text-white mb-6"
                                 data-aos="fade-up"

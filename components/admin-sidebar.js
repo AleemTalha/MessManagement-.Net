@@ -31,9 +31,13 @@ import {
   ClipboardDocumentListIcon,
   CalendarDaysIcon,
   ChartBarIcon,
-  CogIcon,
+  ArchiveBoxIcon,
+  CurrencyDollarIcon,
+  BanknotesIcon,
   ShieldCheckIcon,
   ChevronRightIcon,
+  DocumentTextIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/solid";
 
 const navLinks = [
@@ -56,13 +60,22 @@ const navLinks = [
       { title: "Mess Schedule", url: "/admin/meals/shedule" },
     ],
   },
-  { title: "Schedule", url: "/admin/schedule", icon: CalendarDaysIcon },
-  { title: "Reports", url: "/admin/reports", icon: ChartBarIcon },
-];
-
-const systemLinks = [
-  { title: "Profile", url: "/admin/profile", icon: ShieldCheckIcon },
-  { title: "Settings", url: "/admin/settings", icon: CogIcon },
+  { title: "Bills", url: "/admin/bills", icon: DocumentTextIcon },
+  { title: "Transactions", url: "/admin/transactions", icon: BanknotesIcon },
+  { title: "Absence Applications", url: "/admin/absence-applications", icon: ClipboardDocumentCheckIcon },
+  {
+    title: "Reports",
+    url: "/admin/reports",
+    icon: ChartBarIcon,
+    children: [
+      { title: "Transaction History", url: "/admin/reports/transactions" },
+      { title: "Bill Reports", url: "/admin/reports/bills" },
+      { title: "Attendance Reports", url: "/admin/reports/attendance" },
+    ],
+  },
+  { title: "Inventory", url: "/admin/inventory", icon: ArchiveBoxIcon },
+  { title: "Expenses", url: "/admin/expenses", icon: CurrencyDollarIcon },
+  { title: "Payments", url: "/admin/payments", icon: BanknotesIcon },
 ];
 
 export function AppSidebar({ children }) {
@@ -155,56 +168,7 @@ export function AppSidebar({ children }) {
                 </SidebarMenuItem>
               )
             )}
-            <hr className="my-3 border-t border-slate-200" />
 
-            {systemLinks.map((item) =>
-              item.children ? (
-                <Collapsible
-                  key={item.title}
-                  defaultOpen={false}
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton className="flex items-center gap-2 hover:bg-slate-200/60 rounded-md px-2 py-2 transition-colors">
-                        <item.icon className="h-5 w-5 text-slate-600" />
-                        <span className="flex-1 text-left text-slate-700">{item.title}</span>
-                        <ChevronRightIcon className="h-4 w-4 text-slate-400 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-
-                    <CollapsibleContent>
-                      <SidebarMenuSub className="ml-6 mt-1 space-y-1">
-                        {item.children.map((sub) => (
-                          <SidebarMenuSubItem key={sub.title}>
-                            <SidebarMenuButton asChild>
-                              <Link
-                                href={sub.url}
-                                className="flex items-center gap-2 text-sm text-slate-600 hover:bg-slate-200/40 hover:text-slate-800 rounded-md px-2 py-1.5 transition-colors"
-                              >
-                                {sub.title}
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ) : (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link
-                      href={item.url}
-                      className="flex items-center gap-2 text-slate-700 hover:bg-slate-200/60 rounded-md px-2 py-2 transition-colors"
-                    >
-                      <item.icon className="h-5 w-5 text-slate-600" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )
-            )}
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarContent>

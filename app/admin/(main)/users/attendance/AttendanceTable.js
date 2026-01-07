@@ -383,6 +383,9 @@ const AttendanceTable = ({ month, year, page, limit, onPageChange }) => {
         onPageChange={onPageChange}
         onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
         getPeriodBadge={getPeriodBadge}
+        month={month}
+        year={year}
+        users={data.attendanceData}
       />
       <div className="bg-white border border-slate-400 shadow-lg overflow-hidden relative">
         <div className="overflow-x-auto">

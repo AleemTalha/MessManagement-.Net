@@ -125,11 +125,10 @@ export default function Navbar() {
               <div className="flex items-center space-x-2 xl:space-x-3">
                 <button
                   onClick={handleDashboard}
-                  className="flex items-center space-x-1 xl:space-x-2 px-3 xl:px-4 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors text-sm xl:text-base whitespace-nowrap"
+                  className="flex items-center justify-center w-10 h-10 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors"
+                  title={`${user.name} (${user.role})`}
                 >
-                  <User className="w-4 h-4" />
-                  <span className="hidden xl:inline">{user.name}</span>
-                  <span className="xl:hidden">{user.name.split(' ')[0]}</span>
+                  <User className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleLogout}
@@ -143,10 +142,10 @@ export default function Navbar() {
               </div>
             ) : (
               <Link
-                href="/admin/login"
+                href="/login"
                 className="px-4 xl:px-6 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 transition-colors font-medium text-sm xl:text-base whitespace-nowrap"
               >
-                Book A Table
+                Login
               </Link>
             )}
           </div>
@@ -225,11 +224,11 @@ export default function Navbar() {
               </>
             ) : (
               <Link
-                href="/admin/login"
+                href="/login"
                 className="block px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-center font-medium"
                 onClick={() => setIsOpen(false)}
               >
-                Book A Table
+                Login
               </Link>
             )}
           </div>
