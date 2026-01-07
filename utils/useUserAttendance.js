@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5205";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://https://messmanagement-net-1.onrender.com";
 
 export const useUserAttendance = () => {
   return useQuery({

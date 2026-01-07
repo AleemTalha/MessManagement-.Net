@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5205";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://https://messmanagement-net-1.onrender.com";
 
 const fetchMeals = async () => {
   const response = await fetch(`${API_BASE_URL}/api/admin/meals`, {

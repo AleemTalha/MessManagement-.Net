@@ -1,4 +1,4 @@
-const BACKEND_URI = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5205";
+const BACKEND_URI = process.env.NEXT_PUBLIC_API_URL || "http://https://messmanagement-net-1.onrender.com";
 const MAX_FILE_SIZE_MB = 5;
 const TARGET_SIZE_MB = 1;
 
