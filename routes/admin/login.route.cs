@@ -57,7 +57,7 @@ namespace MessManagement.Routes
                     var token = JwtUtils.GenerateJwtToken(admin, configuration);
                     Console.WriteLine($"JWT token generated for admin: {trimmedEmail}");
 
-                    SessionUtils.SetUserSession(httpContext.Session, admin.Id, admin.Name, admin.Role);
+                    SessionUtils.SetUserSession(httpContext.Session, admin.Id, admin.Name, admin.Role, admin.Email);
                     Console.WriteLine($"Session created for admin: {trimmedEmail}");
 
                     var expiryInMinutes = int.Parse(configuration["JwtSettings:expiryInMinutes"] ?? "60");

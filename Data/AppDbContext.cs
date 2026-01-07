@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MessManagement.Models;
@@ -22,6 +23,36 @@ namespace MessManagement.Data
         public DbSet<Payment> Payments { get; set; }
         public DbSet<UserBalance> UserBalances { get; set; }
         public DbSet<MonthlyAttendance> MonthlyAttendances { get; set; }
+        public DbSet<AbsenceApplication> AbsenceApplications { get; set; }
+
+        public override int SaveChanges()
+        {
+            ConvertDatesToUtc();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            ConvertDatesToUtc();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        private void ConvertDatesToUtc()
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                foreach (var property in entry.Properties)
+                {
+                    if (property.CurrentValue is DateTime dateTime && dateTime.Kind == DateTimeKind.Unspecified)
+                    {
+                        property.CurrentValue = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+                    }
+                }
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -131,6 +162,16 @@ namespace MessManagement.Data
                     da.Property(d => d.Notes).HasMaxLength(500);
                     da.HasIndex(d => d.Date);
                 });
+            });
+
+            modelBuilder.Entity<AbsenceApplication>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserName).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
+                entity.Property(e => e.ReviewedBy).HasMaxLength(100);
+                entity.Property(e => e.Notes).HasMaxLength(500);
+                entity.HasIndex(e => new { e.UserId, e.Date });
             });
         }
     }

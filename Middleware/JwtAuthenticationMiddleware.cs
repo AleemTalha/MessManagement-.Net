@@ -29,7 +29,8 @@ namespace MessManagement.Middleware
             var path = context.Request.Path.Value?.ToLower();
 
             if (path?.StartsWith("/api/admin/login") == true ||
-                path?.StartsWith("/api/admin/register") == true)
+                path?.StartsWith("/api/admin/register") == true ||
+                path?.StartsWith("/api/user/login") == true)
             {
                 await _next(context);
                 return;
@@ -98,11 +99,12 @@ namespace MessManagement.Middleware
                     {
                         UserId = userId,
                         UserName = userName,
-                        UserRole = userRole
+                        UserRole = userRole,
+                        UserEmail = userEmail
                     };
                     
                     // Set session for future requests
-                    SessionUtils.SetUserSession(context.Session, userId, userName, userRole);
+                    SessionUtils.SetUserSession(context.Session, userId, userName, userRole, userEmail);
                     _logger.LogInformation("Session created from JWT for user {UserId} with role {Role}", userId, userRole);
                 }
                 else if (sessionUser.UserId != userId)
@@ -123,6 +125,7 @@ namespace MessManagement.Middleware
                 context.Items["UserId"] = userId;
                 context.Items["UserName"] = sessionUser.UserName;
                 context.Items["UserRole"] = sessionUser.UserRole;
+                context.Items["UserEmail"] = sessionUser.UserEmail;
 
                 _logger.LogInformation("JWT authentication successful for user {UserId}", userId);
                 await _next(context);

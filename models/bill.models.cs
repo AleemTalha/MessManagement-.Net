@@ -13,6 +13,8 @@ namespace MessManagement.Models
 
         public int UserId { get; set; }
 
+        public User User { get; set; }
+
         public DateTime BillMonth { get; set; } = DateTime.UtcNow;
 
         public List<int> UserMealIds { get; set; } = new List<int>();

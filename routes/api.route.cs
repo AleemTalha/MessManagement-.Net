@@ -12,6 +12,7 @@ namespace MessManagement.Routes
         {
             var api = app.MapGroup("/api");
              api.MapAdminRoutes();
+             api.MapUserRoutes();
         }
     }
 }

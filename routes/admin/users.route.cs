@@ -10,9 +10,9 @@ using MessManagement.Utils;
 
 namespace MessManagement.Routes
 {
-    public static class UserRoutes
+    public static class AdminUserManagementRoutes
     {
-        public static void MapUserRoutes(this RouteGroupBuilder admin)
+        public static void MapAdminUserManagementRoutes(this RouteGroupBuilder admin)
         {
             var users = admin.MapGroup("/users");
 
@@ -43,7 +43,7 @@ namespace MessManagement.Routes
                         Age = request.Age ?? 0,
                         Role = request.Role ?? "User",
                         Address = request.Address ?? string.Empty,
-                        DOB = request.DOB,
+                        DOB = request.DOB.HasValue ? DateTime.SpecifyKind(request.DOB.Value, DateTimeKind.Utc) : (DateTime?)null,
                         MessId = request.MessId,
                         IsActive = true,
                         AttendanceStartDate = DateTime.UtcNow
@@ -210,7 +210,7 @@ namespace MessManagement.Routes
 
                     if (request.DOB.HasValue)
                     {
-                        user.DOB = request.DOB;
+                        user.DOB = DateTime.SpecifyKind(request.DOB.Value, DateTimeKind.Utc);
                     }
 
                     if (!string.IsNullOrWhiteSpace(request.Password))

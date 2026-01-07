@@ -22,20 +22,28 @@ namespace MessManagement.Routes
 
         public async Task<AttendanceSaveResult> SaveAttendanceAsync(SaveAttendanceRequest request)
         {
+            // Use local time instead of UTC for all time checks
             var now = DateTime.UtcNow;
             var isCurrentMonth = request.Month == now.Month && request.Year == now.Year;
+            
+            Console.WriteLine($"[SaveAttendance] Current Time: {now:yyyy-MM-dd HH:mm:ss}");
+            Console.WriteLine($"[SaveAttendance] Request - Month: {request.Month}, Year: {request.Year}, Day: {request.Day}");
+            Console.WriteLine($"[SaveAttendance] Attendance count: {request.Attendance.Count}");
             
             if (!isCurrentMonth)
             {
                 return AttendanceSaveResult.Error("Cannot modify past month attendance records");
             }
 
-            var dayDate = new DateTime(request.Year, request.Month, request.Day);
+            var dayDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, request.Day), DateTimeKind.Utc);
             var currentDate = now.Date;
             var currentHour = now.Hour;
             var isToday = dayDate == currentDate;
             var isPastDay = dayDate < currentDate;
             var isFutureDay = dayDate > currentDate;
+
+            Console.WriteLine($"[SaveAttendance] IsToday: {isToday}, IsPast: {isPastDay}, IsFuture: {isFutureDay}");
+            Console.WriteLine($"[SaveAttendance] Current Hour: {currentHour}");
 
             // Prevent modifications to future dates
             if (isFutureDay)
@@ -50,18 +58,20 @@ namespace MessManagement.Routes
                 var isEveningTime = currentHour >= 15;
                 var isBeforeMorningTime = currentHour < 6;
 
+                Console.WriteLine($"[SaveAttendance] Time Check - Morning: {isMorningTime}, Evening: {isEveningTime}, Before: {isBeforeMorningTime}");
+
                 if (isBeforeMorningTime)
                 {
                     return AttendanceSaveResult.Error("Attendance cannot be marked before 6 AM");
                 }
 
-                // If it's morning time, prevent evening attendance modification
+                // During morning time (6 AM to 3 PM), only allow morning attendance
                 if (isMorningTime)
                 {
                     var hasEveningUpdates = request.Attendance.Any(a => a.EveningStatus != null);
                     if (hasEveningUpdates)
                     {
-                        return AttendanceSaveResult.Error("Evening attendance cannot be marked during morning time");
+                        return AttendanceSaveResult.Error("Evening attendance cannot be marked before 3 PM");
                     }
                 }
             }
@@ -70,9 +80,13 @@ namespace MessManagement.Routes
             var schedule = await LoadScheduleWithMealsAsync();
             var daySchedule = GetDaySchedule(schedule, dayDate.DayOfWeek);
 
+            Console.WriteLine($"[SaveAttendance] Day: {dayDate.DayOfWeek}, Schedule loaded: {schedule != null}");
+
             // Process each user's attendance
             foreach (var userAttendance in request.Attendance)
             {
+                Console.WriteLine($"[SaveAttendance] Processing User {userAttendance.UserId}: Morning={userAttendance.MorningStatus}, Evening={userAttendance.EveningStatus}");
+                
                 await UpdateUserAttendanceAsync(
                     userAttendance,
                     request.Month,
@@ -86,7 +100,9 @@ namespace MessManagement.Routes
             // Recalculate and update all user balances after attendance changes
             await UpdateAllUserBalancesAsync(request);
 
+            Console.WriteLine("[SaveAttendance] Saving changes to database...");
             await _db.SaveChangesAsync();
+            Console.WriteLine("[SaveAttendance] Changes saved successfully!");
 
             return AttendanceSaveResult.Success();
         }
@@ -209,6 +225,8 @@ namespace MessManagement.Routes
             // Update morning attendance
             if (userAttendance.MorningStatus != null)
             {
+                Console.WriteLine($"[UpdateAttendance] User {userAttendance.UserId} Day {day}: Setting MorningIsMarked=true, MorningMealTaken={userAttendance.MorningStatus == "p"}");
+                
                 dailyRecord.MorningIsMarked = true; // Mark as explicitly set
                 dailyRecord.MorningMealTaken = userAttendance.MorningStatus == "p";
                 
@@ -217,12 +235,14 @@ namespace MessManagement.Routes
                     dailyRecord.MorningMealName = daySchedule.MorningMeal.Name;
                     dailyRecord.MorningMealPrice = daySchedule.MorningMeal.Price;
                     dailyRecord.MorningChargedAmount = daySchedule.MorningMeal.Price;
+                    Console.WriteLine($"[UpdateAttendance] Morning meal: {daySchedule.MorningMeal.Name}, Price: {daySchedule.MorningMeal.Price}");
                 }
                 else if (!dailyRecord.MorningMealTaken)
                 {
                     dailyRecord.MorningMealName = string.Empty;
                     dailyRecord.MorningMealPrice = 0;
                     dailyRecord.MorningChargedAmount = 0;
+                    Console.WriteLine($"[UpdateAttendance] Morning meal marked absent");
                 }
             }
 

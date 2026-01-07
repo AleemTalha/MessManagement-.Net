@@ -81,7 +81,7 @@ namespace MessManagement.Routes
                         Password = dto.Password ?? string.Empty,
                         PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
                         Age = dto.Age,
-                        DOB = dto.DOB,
+                        DOB = dto.DOB.HasValue ? DateTime.SpecifyKind(dto.DOB.Value, DateTimeKind.Utc) : (DateTime?)null,
                         Address = dto.Address?.Trim() ?? string.Empty,
                         Role = "Admin",
                         IsActive = true

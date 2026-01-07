@@ -60,7 +60,7 @@ namespace MessManagement.Models
                 DailyAttendances.Add(new DailyAttendance
                 {
                     Day = day,
-                    Date = new DateTime(Year, Month, day)
+                    Date = DateTime.SpecifyKind(new DateTime(Year, Month, day), DateTimeKind.Utc)
                 });
             }
         }

@@ -5,16 +5,17 @@ using MessManagement.Utils;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
+// Enable DateTime UTC handling for PostgreSQL
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-// Register Cloudinary service
 builder.Services.AddSingleton<CloudinaryService>();
 
-// Configure JSON serialization to use camelCase
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -34,11 +35,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()
-              .SetIsOriginAllowed(origin => true); // Allow any origin for development
+        policy
+            .WithOrigins("http://localhost:3000", "http://localhost:3001")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true);
     });
 });
 
@@ -46,38 +48,30 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
     try
     {
         if (dbContext.Database.CanConnect())
         {
-            Console.WriteLine("Database connection successful!");
+            logger.LogInformation("Neon PostgreSQL connection SUCCESSFUL");
         }
         else
         {
-            Console.WriteLine("Database connection failed!");
+            logger.LogError("Neon PostgreSQL connection FAILED (CanConnect returned false)");
         }
-
-        // Comment out auto-migration since tables already exist
-        // dbContext.Database.Migrate();
-        Console.WriteLine("Skipping auto-migration. Database ready.");
     }
-    catch (Exception err)
+    catch (Exception ex)
     {
-        Console.WriteLine("Unexpected error during database setup: " + err.Message);
+        logger.LogCritical(ex, "Neon PostgreSQL connection ERROR");
     }
 }
 
 app.UseMiddleware<RequestLoggingMiddleware>();
-
 app.UseMiddleware<ErrorHandlingMiddleware>();
-
 app.UseCors("AllowFrontend");
-
 app.UseSession();
-
 app.UseMiddleware<JwtAuthenticationMiddleware>();
-
 app.MapApiRoutes();
-
 app.Run();

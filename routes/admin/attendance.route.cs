@@ -123,7 +123,7 @@ namespace MessManagement.Routes
                     .ToListAsync();
 
                 var attendanceData = new List<object>();
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow;  // Use local time consistently
                 var currentDate = now.Date;
                 var currentHour = now.Hour;
                 
@@ -164,7 +164,7 @@ namespace MessManagement.Routes
 
                     for (int day = 1; day <= daysInMonth; day++)
                     {
-                        var dayDate = new DateTime(year, month, day);
+                        var dayDate = DateTime.SpecifyKind(new DateTime(year, month, day), DateTimeKind.Utc);
                         var isToday = isCurrentMonth && dayDate == currentDate;
                         var isPastDay = dayDate < currentDate;
                         var isFutureDay = dayDate > currentDate;

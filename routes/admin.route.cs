@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using MessManagement.Data;
 using MessManagement.Routes;
 using MessManagement.Utils;
+using MessManagement.Models;
 
 namespace MessManagement.Routes
 {
@@ -19,9 +20,12 @@ namespace MessManagement.Routes
             admin.MapMealRoutes();
             admin.MapScheduleRoutes();
             admin.MapUploadRoutes();
-            admin.MapUserRoutes();
+            admin.MapAdminUserManagementRoutes();
             admin.MapAttendanceRoutes();
             admin.MapResetAttendanceRoutes();
+            admin.MapBillRoutes();
+            admin.MapAbsenceApplicationAdminRoutes();
+            admin.MapAdminTransactionRoutes();
 
             admin.MapGet("/profile", (HttpContext context) =>
             {
