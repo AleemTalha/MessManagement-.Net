@@ -73,8 +73,8 @@ app.UseCors("AllowFrontend");
 app.UseSession();
 app.UseMiddleware<JwtAuthenticationMiddleware>();
 app.MapApiRoutes();
-
-// Basic Hello World route for testing
 app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
 
-app.Run();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
+var url = $"http://0.0.0.0:{port}";
+app.Run(url);
