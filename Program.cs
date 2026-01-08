@@ -34,11 +34,14 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(60);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = isProd
-        ? CookieSecurePolicy.Always
-        : CookieSecurePolicy.None;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Cookie.Domain = ".onrender.com"; // subdomain match
+    options.Cookie.SecurePolicy = isProd ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
+    options.Cookie.SameSite = isProd ? SameSiteMode.None : SameSiteMode.Lax;
+    if (isProd)
+    {
+        var cookieDomain = builder.Configuration["CookieDomain"];
+        if (!string.IsNullOrEmpty(cookieDomain))
+            options.Cookie.Domain = cookieDomain;
+    }
 });
 
 // CORS
@@ -47,18 +50,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendOnly", policy =>
     {
-        policy.SetIsOriginAllowed(origin =>
-        {
-            foreach (var allowed in allowedOrigins)
-            {
-                if (origin.EndsWith(allowed, StringComparison.OrdinalIgnoreCase))
-                    return true;
-            }
-            return false;
-        })
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 

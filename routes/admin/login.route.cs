@@ -50,10 +50,15 @@ namespace MessManagement.Routes
                         HttpOnly = true,
                         Secure = true,
                         SameSite = SameSiteMode.None,
-                        Domain = ".onrender.com",
                         Expires = DateTimeOffset.UtcNow.AddMinutes(expiryInMinutes),
                         Path = "/"
                     };
+
+                    var cookieDomain = configuration["CookieDomain"];
+                    if (!string.IsNullOrEmpty(cookieDomain))
+                    {
+                        cookieOptions.Domain = cookieDomain;
+                    }
 
                     httpContext.Response.Cookies.Append("accessToken", token, cookieOptions);
 
@@ -76,7 +81,7 @@ namespace MessManagement.Routes
                 }
             });
 
-            admin.MapPost("/logout", async (HttpContext httpContext) =>
+            admin.MapPost("/logout", async (HttpContext httpContext, IConfiguration configuration) =>
             {
                 httpContext.Session.Clear();
 
@@ -85,10 +90,15 @@ namespace MessManagement.Routes
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.None,
-                    Domain = ".onrender.com",
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Path = "/"
                 };
+
+                var cookieDomain = configuration["CookieDomain"];
+                if (!string.IsNullOrEmpty(cookieDomain))
+                {
+                    cookieOptions.Domain = cookieDomain;
+                }
 
                 httpContext.Response.Cookies.Append("accessToken", "", cookieOptions);
 
