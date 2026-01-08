@@ -77,7 +77,7 @@ namespace MessManagement.Routes
                 }
             });
 
-            user.MapPost("/logout", async (HttpContext httpContext, IConfiguration configuration) =>
+            user.MapPost("/logout", async (HttpContext httpContext) =>
             {
                 httpContext.Session.Clear();
 
@@ -89,12 +89,6 @@ namespace MessManagement.Routes
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Path = "/"
                 };
-
-                var cookieDomain = configuration["CookieDomain"];
-                if (!string.IsNullOrEmpty(cookieDomain))
-                {
-                    cookieOptions.Domain = cookieDomain;
-                }
 
                 httpContext.Response.Cookies.Append("accessToken", "", cookieOptions);
 

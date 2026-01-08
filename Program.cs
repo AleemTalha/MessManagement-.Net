@@ -36,12 +36,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = isProd ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
     options.Cookie.SameSite = isProd ? SameSiteMode.None : SameSiteMode.Lax;
-    if (isProd)
-    {
-        var cookieDomain = builder.Configuration["CookieDomain"];
-        if (!string.IsNullOrEmpty(cookieDomain))
-            options.Cookie.Domain = cookieDomain;
-    }
 });
 
 // CORS

@@ -54,13 +54,11 @@ namespace MessManagement.Routes
                         Path = "/"
                     };
 
-                    var cookieDomain = configuration["CookieDomain"];
-                    if (!string.IsNullOrEmpty(cookieDomain))
-                    {
-                        cookieOptions.Domain = cookieDomain;
-                    }
-
                     httpContext.Response.Cookies.Append("accessToken", token, cookieOptions);
+                    
+                    Console.WriteLine($"Admin login successful - ID: {adminUser.Id}, Email: {adminUser.Email}");
+                    Console.WriteLine($"Token generated and sent in response body");
+                    Console.WriteLine($"Origin: {httpContext.Request.Headers["Origin"]}");
 
                     return Results.Ok(new
                     {
@@ -81,7 +79,7 @@ namespace MessManagement.Routes
                 }
             });
 
-            admin.MapPost("/logout", async (HttpContext httpContext, IConfiguration configuration) =>
+            admin.MapPost("/logout", async (HttpContext httpContext) =>
             {
                 httpContext.Session.Clear();
 
@@ -93,12 +91,6 @@ namespace MessManagement.Routes
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Path = "/"
                 };
-
-                var cookieDomain = configuration["CookieDomain"];
-                if (!string.IsNullOrEmpty(cookieDomain))
-                {
-                    cookieOptions.Domain = cookieDomain;
-                }
 
                 httpContext.Response.Cookies.Append("accessToken", "", cookieOptions);
 
