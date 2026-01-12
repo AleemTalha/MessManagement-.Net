@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import AuthDebugger from "@/components/AuthDebugger";
 import { useState } from "react";
 
 const raleway = Raleway({
@@ -44,6 +45,7 @@ export default function RootLayout({ children }) {
             theme="light"
           />
           <ReactQueryDevtools initialIsOpen={false} />
+          <AuthDebugger />
         </QueryClientProvider>
       </body>
     </html>

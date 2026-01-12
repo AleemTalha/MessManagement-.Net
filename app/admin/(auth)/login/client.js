@@ -42,8 +42,23 @@ export default function AdminLogin() {
 
       if (response.ok) {
         if (data.token) {
-          // Set authentication cookies properly for middleware compatibility
-          setAuthCookies(data.token, data.sessionId, data.user);
+          // Set authentication cookies with validation
+          const cookieResult = setAuthCookies(data.token, data.sessionId, data.user);
+          
+          // Check if all cookies were set successfully
+          if (!cookieResult.allSuccessful) {
+            console.warn('⚠ Some cookies failed to set:', cookieResult.errors);
+            // Show warning but continue (fallback to localStorage is active)
+            if (cookieResult.errors.length > 0) {
+              toast.warning('Using localStorage backup for authentication');
+            }
+          } else {
+            console.log('✓ All cookies set successfully');
+          }
+        } else {
+          toast.error('No authentication token received from server');
+          setIsLoading(false);
+          return;
         }
         toast.success("Login successful! Redirecting...");
         setTimeout(() => {
