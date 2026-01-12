@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -13,9 +14,7 @@ export const useAttendance = (month, year, page = 1, limit = 30) => {
 
       const response = await fetch(
         `${API_BASE_URL}/api/admin/attendance/monthly?month=${month}&year=${year}&page=${page}&limit=${limit}`,
-        {
-          credentials: "include",
-        }
+        getFetchOptions()
       );
 
       if (!response.ok) {
@@ -39,14 +38,10 @@ export const useSaveAttendance = () => {
 
   return useMutation({
     mutationFn: async ({ month, year, day, attendance }) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/attendance/save`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/attendance/save`, getFetchOptions({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ month, year, day, attendance }),
-      });
+      }));
 
       if (!response.ok) {
         const error = await response.json();
@@ -67,9 +62,7 @@ export const useUserAttendance = () => {
   return useQuery({
     queryKey: ["userAttendance"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/user/attendance`, {
-        credentials: "include",
-      });
+      const response = await fetch(`${API_BASE_URL}/api/user/attendance`, getFetchOptions());
 
       if (!response.ok) {
         const error = await response.json();

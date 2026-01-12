@@ -1,16 +1,12 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
 const fetchMeals = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/meals`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/meals`, getFetchOptions());
 
   if (!response.ok) {
     throw new Error("Failed to fetch meals");
@@ -20,12 +16,7 @@ const fetchMeals = async () => {
 };
 
 const fetchMealById = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, getFetchOptions());
 
   if (!response.ok) {
     throw new Error("Failed to fetch meal");
@@ -35,14 +26,10 @@ const fetchMealById = async (id) => {
 };
 
 const createMeal = async (mealData) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/meals`, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/meals`, getFetchOptions({
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(mealData),
-  });
+  }));
 
   if (!response.ok) {
     const error = await response.json();
@@ -53,14 +40,10 @@ const createMeal = async (mealData) => {
 };
 
 const updateMeal = async ({ id, data }) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, getFetchOptions({
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(data),
-  });
+  }));
 
   if (!response.ok) {
     const error = await response.json();
@@ -71,13 +54,7 @@ const updateMeal = async ({ id, data }) => {
 };
 
 const deleteMeal = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/meals/${id}`, getFetchOptions({ method: "DELETE" }));
 
   if (!response.ok) {
     const error = await response.json();

@@ -1,6 +1,6 @@
 "use client";
 
-const backend_uri = process.env.NEXT_PUBLIC_BACKEND_URI || "https://messmanagement-net.onrender.com";
+const backend_uri = process.env.NEXT_PUBLIC_BACKEND_URI || "http://localhost:5205";
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { setSessionId } from "@/utils/authHelper";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -40,6 +41,15 @@ export default function AdminLogin() {
       const data = await response.json();
 
       if (response.ok) {
+        if (data.token) {
+          localStorage.setItem("accessToken", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          
+          // Set sessionId from response
+          if (data.sessionId) {
+            setSessionId(data.sessionId);
+          }
+        }
         toast.success("Login successful! Redirecting...");
         setTimeout(() => {
           router.push("/admin/dashboard");

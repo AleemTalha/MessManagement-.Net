@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -14,9 +15,7 @@ export const useBills = (page = 1, limit = 10, userId = "", userName = "") => {
       if (userId) params.append("userId", userId);
       if (userName) params.append("userName", userName);
 
-      const response = await fetch(`${API_BASE_URL}/api/admin/bills/get?${params}`, {
-        credentials: "include",
-      });
+      const response = await fetch(`${API_BASE_URL}/api/admin/bills/get?${params}`, getFetchOptions());
 
       if (!response.ok) {
         const error = await response.json();
@@ -33,14 +32,10 @@ export const useGenerateBill = () => {
 
   return useMutation({
     mutationFn: async ({ userId, month, year }) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/bills/generate`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/bills/generate`, getFetchOptions({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ userId, month, year }),
-      });
+      }));
 
       if (!response.ok) {
         const error = await response.json();
@@ -60,14 +55,10 @@ export const useUpdateBillPayment = () => {
 
   return useMutation({
     mutationFn: async ({ billId, paidAmount }) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/bills/${billId}/payment`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/bills/${billId}/payment`, getFetchOptions({
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ paidAmount }),
-      });
+      }));
 
       if (!response.ok) {
         const error = await response.json();

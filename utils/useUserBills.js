@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -7,9 +8,7 @@ export const useUserBills = () => {
   return useQuery({
     queryKey: ["user-bills"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/user/bills`, {
-        credentials: "include",
-      });
+      const response = await fetch(`${API_BASE_URL}/api/user/bills`, getFetchOptions());
 
       if (!response.ok) {
         const error = await response.json();
@@ -26,12 +25,8 @@ export const usePayBill = () => {
 
   return useMutation({
     mutationFn: async ({ billId, amount, paymentMethod, transactionId, notes }) => {
-      const response = await fetch(`${API_BASE_URL}/api/user/bills/pay`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/bills/pay`, getFetchOptions({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({
           billId,
           amount,
@@ -39,7 +34,7 @@ export const usePayBill = () => {
           transactionId: transactionId || "",
           notes: notes || "",
         }),
-      });
+      }));
 
       if (!response.ok) {
         const error = await response.json();

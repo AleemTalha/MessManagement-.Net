@@ -10,6 +10,7 @@ export default function Error({ error, reset }) {
   const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setErrorId(Date.now().toString(36));
     setCurrentTime(new Date().toLocaleString());
   }, []);

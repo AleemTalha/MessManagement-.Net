@@ -1,17 +1,13 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
 // Fetch current week schedule
 const fetchSchedule = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/schedules`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/schedules`, getFetchOptions());
 
   if (!response.ok) {
     throw new Error("Failed to fetch schedule");
@@ -22,12 +18,7 @@ const fetchSchedule = async () => {
 
 // Fetch schedule by ID
 const fetchScheduleById = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, getFetchOptions());
 
   if (!response.ok) {
     throw new Error("Failed to fetch schedule");
@@ -38,14 +29,10 @@ const fetchScheduleById = async (id) => {
 
 // Create new schedule
 const createSchedule = async (scheduleData) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/schedules`, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/schedules`, getFetchOptions({
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(scheduleData),
-  });
+  }));
 
   if (!response.ok) {
     let errorMessage = "Failed to create schedule";
@@ -63,14 +50,10 @@ const createSchedule = async (scheduleData) => {
 
 // Update schedule
 const updateSchedule = async ({ id, data }) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, getFetchOptions({
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
     body: JSON.stringify(data),
-  });
+  }));
 
   if (!response.ok) {
     let errorMessage = "Failed to update schedule";
@@ -88,13 +71,7 @@ const updateSchedule = async ({ id, data }) => {
 
 // Delete schedule
 const deleteSchedule = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    credentials: "include",
-  });
+  const response = await fetch(`${API_BASE_URL}/api/admin/schedules/${id}`, getFetchOptions({ method: "DELETE" }));
 
   if (!response.ok) {
     const error = await response.json();

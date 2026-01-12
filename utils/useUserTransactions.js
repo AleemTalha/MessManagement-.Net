@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { getFetchOptions } from './authHelper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://messmanagement-net.onrender.com';
 
@@ -6,13 +7,7 @@ export const useUserTransactions = () => {
   return useQuery({
     queryKey: ['userTransactions'],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/user/transactions`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(`${API_BASE_URL}/api/user/transactions`, getFetchOptions({ method: 'GET' }));
 
       if (!response.ok) {
         throw new Error('Failed to fetch transactions');

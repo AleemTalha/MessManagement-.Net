@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -6,9 +7,10 @@ export const useUsers = (skip = 0, limit = 10) => {
   return useQuery({
     queryKey: ["users", skip, limit],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users?skip=${skip}&limit=${limit}`, {
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users?skip=${skip}&limit=${limit}`,
+        getFetchOptions()
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -25,14 +27,13 @@ export const useCreateUser = () => {
 
   return useMutation({
     mutationFn: async (userData) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(userData),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users`,
+        getFetchOptions({
+          method: "POST",
+          body: JSON.stringify(userData),
+        })
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -52,14 +53,13 @@ export const useUpdateUser = () => {
 
   return useMutation({
     mutationFn: async ({ id, data }) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${id}`,
+        getFetchOptions({
+          method: "PUT",
+          body: JSON.stringify(data),
+        })
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -79,10 +79,12 @@ export const useDeleteUser = () => {
 
   return useMutation({
     mutationFn: async (id) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${id}`,
+        getFetchOptions({
+          method: "DELETE",
+        })
+      );
 
       if (!response.ok) {
         const error = await response.json();

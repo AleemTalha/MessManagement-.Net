@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -7,9 +8,7 @@ export const useUserAbsenceApplications = () => {
   return useQuery({
     queryKey: ["user-absence-applications"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/user/absence-applications`, {
-        credentials: "include",
-      });
+      const response = await fetch(`${API_BASE_URL}/api/user/absence-applications`, getFetchOptions());
       if (!response.ok) {
         throw new Error("Failed to fetch absence applications");
       }
@@ -23,14 +22,10 @@ export const useSubmitAbsenceApplication = () => {
 
   return useMutation({
     mutationFn: async (data) => {
-      const response = await fetch(`${API_BASE_URL}/api/user/absence-application`, {
+      const response = await fetch(`${API_BASE_URL}/api/user/absence-application`, getFetchOptions({
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ date: data.date, type: data.type || "Absence" }),
-      });
+      }));
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to submit application");

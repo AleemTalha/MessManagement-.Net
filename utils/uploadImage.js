@@ -1,3 +1,5 @@
+import { getFetchOptions } from "./authHelper";
+
 const BACKEND_URI = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 const MAX_FILE_SIZE_MB = 5;
 const TARGET_SIZE_MB = 1;
@@ -92,11 +94,10 @@ export const uploadImageToBackend = async (file) => {
     const formData = new FormData();
     formData.append("image", fileToUpload);
 
-    const response = await fetch(`${BACKEND_URI}/api/admin/upload`, {
+    const response = await fetch(`${BACKEND_URI}/api/admin/upload`, getFetchOptions({
       method: "POST",
-      credentials: "include",
       body: formData,
-    });
+    }));
 
     const result = await response.json();
 
@@ -121,14 +122,10 @@ export const uploadImageToBackend = async (file) => {
 
 export const deleteImageFromBackend = async (publicId) => {
   try {
-    const response = await fetch(`${BACKEND_URI}/api/admin/upload`, {
+    const response = await fetch(`${BACKEND_URI}/api/admin/upload`, getFetchOptions({
       method: "DELETE",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ publicId }),
-    });
+    }));
 
     const result = await response.json();
 

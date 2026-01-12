@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { getFetchOptions } from "./authHelper";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://messmanagement-net.onrender.com";
 
@@ -10,9 +11,7 @@ export const useAdminAbsenceApplications = (status = null) => {
       const url = status
         ? `${API_BASE_URL}/api/admin/absence-applications?status=${status}`
         : `${API_BASE_URL}/api/admin/absence-applications`;
-      const response = await fetch(url, {
-        credentials: "include",
-      });
+      const response = await fetch(url, getFetchOptions());
       if (!response.ok) {
         throw new Error("Failed to fetch absence applications");
       }
@@ -26,14 +25,10 @@ export const useReviewAbsenceApplication = () => {
 
   return useMutation({
     mutationFn: async ({ id, status, notes }) => {
-      const response = await fetch(`${API_BASE_URL}/api/admin/absence-application/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/absence-application/${id}`, getFetchOptions({
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
         body: JSON.stringify({ status, notes }),
-      });
+      }));
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to review application");
