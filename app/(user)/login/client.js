@@ -8,7 +8,7 @@ import Image from "next/image";
 import { toast } from "react-toastify";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { setSessionId } from "@/utils/authHelper";
+import { setAuthCookies } from "@/utils/cookieHelper";
 
 export default function UserLogin() {
   const [email, setEmail] = useState("");
@@ -42,13 +42,8 @@ export default function UserLogin() {
 
       if (response.ok) {
         if (data.token) {
-          localStorage.setItem("accessToken", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          
-          // Set sessionId from response
-          if (data.sessionId) {
-            setSessionId(data.sessionId);
-          }
+          // Set authentication cookies properly for middleware compatibility
+          setAuthCookies(data.token, data.sessionId, data.user);
         }
         toast.success("Login successful! Redirecting...");
         setTimeout(() => {
