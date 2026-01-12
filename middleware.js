@@ -6,10 +6,6 @@ export function middleware(request) {
   const sessionAspNetCore = request.cookies.get('.AspNetCore.Session')?.value
   const { pathname } = request.nextUrl
 
-  /**
-   * Decode JWT token payload to extract claims
-   * Returns decoded payload or null if invalid
-   */
   function decodeJWT(token) {
     try {
       const base64Url = token.split('.')[1]
