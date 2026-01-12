@@ -45,11 +45,13 @@ namespace MessManagement.Routes
                     SessionUtils.SetUserSession(httpContext.Session, adminUser.Id, adminUser.Name, adminUser.Role, adminUser.Email);
 
                     var expiryInMinutes = int.Parse(configuration["JwtSettings:expiryInMinutes"] ?? "60");
+                    var isProduction = httpContext.Request.Host.Host != "localhost" && httpContext.Request.Host.Host != "127.0.0.1";
+                    
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.None,
+                        Secure = isProduction,
+                        SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
                         Expires = DateTimeOffset.UtcNow.AddMinutes(expiryInMinutes),
                         Path = "/"
                     };
@@ -57,12 +59,16 @@ namespace MessManagement.Routes
                     httpContext.Response.Cookies.Append("accessToken", token, cookieOptions);
                     
                     Console.WriteLine($"Admin login successful - ID: {adminUser.Id}, Email: {adminUser.Email}");
-                    Console.WriteLine($"Token generated and sent in response body");
+                    Console.WriteLine($"Token: {token}");
+                    Console.WriteLine($"Session ID: {httpContext.Session.Id}");
                     Console.WriteLine($"Origin: {httpContext.Request.Headers["Origin"]}");
+                    Console.WriteLine($"IsProduction: {isProduction}, Secure: {isProduction}");
 
                     return Results.Ok(new
                     {
                         token = token,
+                        sessionId = httpContext.Session.Id,
+                        expiresIn = expiryInMinutes * 60,
                         user = new
                         {
                             id = adminUser.Id,
@@ -82,12 +88,13 @@ namespace MessManagement.Routes
             admin.MapPost("/logout", async (HttpContext httpContext) =>
             {
                 httpContext.Session.Clear();
+                var isProduction = httpContext.Request.Host.Host != "localhost" && httpContext.Request.Host.Host != "127.0.0.1";
 
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
+                    Secure = isProduction,
+                    SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Path = "/"
                 };

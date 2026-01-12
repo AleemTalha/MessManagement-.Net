@@ -57,9 +57,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
-// JWT middleware
-builder.Services.AddScoped<JwtAuthenticationMiddleware>();
-
 try
 {
     var app = builder.Build();
@@ -114,8 +111,7 @@ try
     app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
 
     // Run server
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
-    app.Run($"http://0.0.0.0:{port}");
+    app.Run();
 }
 catch (Exception ex)
 {

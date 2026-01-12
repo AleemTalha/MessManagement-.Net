@@ -45,22 +45,29 @@ namespace MessManagement.Routes
                     SessionUtils.SetUserSession(httpContext.Session, userEntity.Id, userEntity.Name, userEntity.Role, userEntity.Email);
 
                     var expiryInMinutes = int.Parse(configuration["JwtSettings:expiryInMinutes"] ?? "60");
+                    var isProduction = httpContext.Request.Host.Host != "localhost" && httpContext.Request.Host.Host != "127.0.0.1";
+                    
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true, // must be HTTPS in Render deployment
-                        SameSite = SameSiteMode.None, // cross-subdomain allowed
-                        Domain = ".onrender.com", // matches all subdomains
+                        Secure = isProduction,
+                        SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
                         Expires = DateTimeOffset.UtcNow.AddMinutes(expiryInMinutes),
                         Path = "/"
                     };
-                    Console.WriteLine("Cookies are being set with domain: " + cookieOptions.Domain  + " and Secure: " + cookieOptions.Secure);
-                    Console.WriteLine("Token: " + token);
+
                     httpContext.Response.Cookies.Append("accessToken", token, cookieOptions);
+                    
+                    Console.WriteLine($"User login successful - ID: {userEntity.Id}, Email: {userEntity.Email}");
+                    Console.WriteLine($"Token: {token}");
+                    Console.WriteLine($"Session ID: {httpContext.Session.Id}");
+                    Console.WriteLine($"IsProduction: {isProduction}, Secure: {isProduction}");
 
                     return Results.Ok(new
                     {
                         token = token,
+                        sessionId = httpContext.Session.Id,
+                        expiresIn = expiryInMinutes * 60,
                         user = new
                         {
                             id = userEntity.Id,
@@ -80,12 +87,13 @@ namespace MessManagement.Routes
             user.MapPost("/logout", async (HttpContext httpContext) =>
             {
                 httpContext.Session.Clear();
+                var isProduction = httpContext.Request.Host.Host != "localhost" && httpContext.Request.Host.Host != "127.0.0.1";
 
                 var cookieOptions = new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.None,
+                    Secure = isProduction,
+                    SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Path = "/"
                 };

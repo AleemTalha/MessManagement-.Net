@@ -22,7 +22,7 @@ namespace MessManagement.Routes
 
                 if (sessionUser.UserRole != "User")
                 {
-                    return Results.Forbid();
+                    return Results.Json(new { message = "Access denied. User role required." }, statusCode: 403);
                 }
 
                 try

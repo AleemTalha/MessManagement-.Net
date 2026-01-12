@@ -1,3 +1,4 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
@@ -37,10 +38,35 @@ namespace MessManagement.Middleware
             }
 
             var token = GetTokenFromRequest(context);
+            var providedSessionId = GetSessionIdFromRequest(context);
 
             if (string.IsNullOrEmpty(token))
             {
-                _logger.LogWarning("No JWT token found in request");
+                var sessionUserOnly = SessionUtils.GetUser(context.Session);
+                if (sessionUserOnly != null)
+                {
+                    // If client provided a session id header/cookie, ensure it matches the current server session id
+                    if (!string.IsNullOrEmpty(providedSessionId) && providedSessionId != context.Session.Id)
+                    {
+                        _logger.LogWarning("Provided session id {Provided} does not match server session id {Server}.", providedSessionId, context.Session.Id);
+                        ClearAuthenticationCookiesAndSession(context);
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsJsonAsync(new { message = "Session mismatch" });
+                        return;
+                    }
+
+                    _logger.LogInformation("No JWT token provided but session exists — using session-based auth for user {UserId}", sessionUserOnly.UserId);
+                    context.Items["User"] = sessionUserOnly;
+                    context.Items["UserId"] = sessionUserOnly.UserId;
+                    context.Items["UserName"] = sessionUserOnly.UserName;
+                    context.Items["UserRole"] = sessionUserOnly.UserRole;
+                    context.Items["UserEmail"] = sessionUserOnly.UserEmail;
+                    await _next(context);
+                    return;
+                }
+
+                _logger.LogWarning("No JWT token found in request and no session present");
+                ClearAuthenticationCookiesAndSession(context);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await context.Response.WriteAsJsonAsync(new { message = "Authentication required" });
                 return;
@@ -53,6 +79,7 @@ namespace MessManagement.Middleware
                 if (principal == null)
                 {
                     _logger.LogWarning("Invalid JWT token");
+                    ClearAuthenticationCookiesAndSession(context);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     await context.Response.WriteAsJsonAsync(new { message = "Invalid token" });
                     return;
@@ -68,6 +95,7 @@ namespace MessManagement.Middleware
                 if (string.IsNullOrEmpty(userIdClaim))
                 {
                     _logger.LogWarning("No user ID claim found in JWT token");
+                    ClearAuthenticationCookiesAndSession(context);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     await context.Response.WriteAsJsonAsync(new { message = "Invalid token claims - no user ID" });
                     return;
@@ -76,11 +104,13 @@ namespace MessManagement.Middleware
                 if (!int.TryParse(userIdClaim, out var userId))
                 {
                     _logger.LogWarning("Invalid user ID format in JWT token: {UserIdClaim}", userIdClaim);
+                    ClearAuthenticationCookiesAndSession(context);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     await context.Response.WriteAsJsonAsync(new { message = "Invalid token claims - user ID format" });
                     return;
                 }
 
+                // Read session id candidate (already obtained above) and session user
                 var sessionUser = SessionUtils.GetUser(context.Session);
                 
                 if (sessionUser == null)
@@ -106,9 +136,37 @@ namespace MessManagement.Middleware
                     // Set session for future requests
                     SessionUtils.SetUserSession(context.Session, userId, userName, userRole, userEmail);
                     _logger.LogInformation("Session created from JWT for user {UserId} with role {Role}", userId, userRole);
+
+                    // If client provided a session id that doesn't match the new server session id, inform client
+                    if (!string.IsNullOrEmpty(providedSessionId) && providedSessionId != context.Session.Id)
+                    {
+                        var isProduction = context.Request.Host.Host != "localhost" && context.Request.Host.Host != "127.0.0.1";
+                        var cookieOptions = new CookieOptions
+                        {
+                            HttpOnly = false,
+                            Secure = isProduction,
+                            SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
+                            Expires = DateTimeOffset.UtcNow.AddHours(1),
+                            Path = "/"
+                        };
+                        context.Response.Cookies.Append("sessionId", context.Session.Id, cookieOptions);
+                        context.Response.Headers["X-Session-Id"] = context.Session.Id;
+                        _logger.LogInformation("Provided session id did not match server session. Sent new session id {SessionId} to client.", context.Session.Id);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(providedSessionId) && providedSessionId != context.Session.Id)
+                {
+                    // Provided session id doesn't match the server session id -> possible tampering or stale client
+                    _logger.LogWarning("Provided session id {Provided} does not match server session id {Server}.", providedSessionId, context.Session.Id);
+                    ClearAuthenticationCookiesAndSession(context);
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await context.Response.WriteAsJsonAsync(new { message = "Session mismatch" });
+                    return;
                 }
                 else if (sessionUser.UserId != userId)
                 {
+                    ClearAuthenticationCookiesAndSession(context);
+                    
                     _logger.LogWarning("Session user ID {SessionUserId} does not match JWT user ID {JwtUserId}", 
                         sessionUser.UserId, userId);
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -132,7 +190,7 @@ namespace MessManagement.Middleware
             }
             catch (SecurityTokenExpiredException)
             {
-                _logger.LogWarning("JWT token expired");
+                ClearAuthenticationCookiesAndSession(context);
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 await context.Response.WriteAsJsonAsync(new { message = "Token expired" });
                 return;
@@ -140,6 +198,7 @@ namespace MessManagement.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during JWT authentication");
+                ClearAuthenticationCookiesAndSession(context);
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 Console.WriteLine(ex);
                 await context.Response.WriteAsJsonAsync(new { message = "Authentication error" });
@@ -147,15 +206,72 @@ namespace MessManagement.Middleware
             }
         }
 
+        private void ClearAuthenticationCookiesAndSession(HttpContext context)
+        {
+            // Clear session
+            context.Session.Clear();
+            
+            // Clear access token and session cookies
+            var isProduction = context.Request.Host.Host != "localhost" && context.Request.Host.Host != "127.0.0.1";
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isProduction,
+                SameSite = isProduction ? SameSiteMode.None : SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(-1),
+                Path = "/"
+            };
+            
+            context.Response.Cookies.Append("accessToken", "", cookieOptions);
+            context.Response.Cookies.Append("sessionId", "", cookieOptions);
+            context.Response.Headers.Remove("X-Session-Id");
+            _logger.LogInformation("Cleared authentication cookies and session");
+            return;
+        }
+
         private static string? GetTokenFromRequest(HttpContext context)
         {
             var authorizationHeader = context.Request.Headers["Authorization"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(authorizationHeader) && authorizationHeader.StartsWith("Bearer "))
+            if (!string.IsNullOrWhiteSpace(authorizationHeader))
             {
-                return authorizationHeader.Substring("Bearer ".Length).Trim();
+                // Accept: "Bearer <token>" (case-insensitive) or just a bare token
+                var parts = authorizationHeader.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 2 && parts[0].Equals("Bearer", StringComparison.OrdinalIgnoreCase))
+                    return parts[1].Trim();
+
+                if (parts.Length == 1)
+                    return parts[0].Trim();
             }
 
-            return context.Request.Cookies["accessToken"];
+            // Fallback to common alternate header
+            var xToken = context.Request.Headers["X-Access-Token"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(xToken))
+                return xToken.Trim();
+
+            // Then fallback to cookies
+            if (context.Request.Cookies.TryGetValue("accessToken", out var cookieToken) && !string.IsNullOrWhiteSpace(cookieToken))
+                return cookieToken.Trim();
+
+            if (context.Request.Cookies.TryGetValue("token", out var cookieToken2) && !string.IsNullOrWhiteSpace(cookieToken2))
+                return cookieToken2.Trim();
+
+            return null;
+        }
+
+        private static string? GetSessionIdFromRequest(HttpContext context)
+        {
+            var header = context.Request.Headers["X-Session-Id"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(header))
+                return header.Trim();
+
+            if (context.Request.Cookies.TryGetValue("sessionId", out var cookieSession) && !string.IsNullOrWhiteSpace(cookieSession))
+                return cookieSession.Trim();
+
+            // Fallback to the current server session id if present
+            if (!string.IsNullOrEmpty(context.Session.Id))
+                return context.Session.Id;
+
+            return null;
         }
     }
 }
