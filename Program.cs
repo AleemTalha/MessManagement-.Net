@@ -55,10 +55,28 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedForHeaderName = "X-Forwarded-For";
+    options.ForwardedProtoHeaderName = "X-Forwarded-Proto";
 });
+
+// Configure Kestrel server for production
+if (!builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(75);
+        options.Limits.RequestHeadersTimeout = TimeSpan.FromSeconds(30);
+        options.AllowSynchronousIO = false;
+    });
+}
 
 try
 {
+    // Configure port for Render and other environments
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    var urls = $"http://+:{port};http://0.0.0.0:{port}";
+    builder.WebHost.UseUrls(urls);
+
     var app = builder.Build();
 
     // Forwarded headers
@@ -110,8 +128,8 @@ try
     // Simple health check
     app.MapGet("/hello", () => Results.Ok(new { message = "Hello World from backend!" }));
 
-    // Run server
-    app.Run();
+    // Run server with async support
+    await app.RunAsync();
 }
 catch (Exception ex)
 {

@@ -24,8 +24,8 @@ RUN apt-get update && apt-get install -y libkrb5-dev
 
 COPY --from=build /app/out .
 
-# Use Render's PORT environment variable
-ENV ASPNETCORE_URLS=http://+:$PORT
+# Expose port for Render (default 10000, but will use environment variable)
+EXPOSE 10000
 
-# Start the application
+# Start the application with proper port binding
 ENTRYPOINT ["dotnet", "backned.dll"]
